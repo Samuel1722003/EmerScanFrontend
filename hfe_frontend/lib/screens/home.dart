@@ -9,10 +9,12 @@ class HomeScreen extends StatelessWidget {
       body: Center(
         child: Column(
           children: [
-            SizedBox(height: 10),
-            ElevatedButton(onPressed: () {}, child: Text("Holiwis")),
-            SizedBox(height: 10),
-            ElevatedButton(onPressed: () {}, child: Text("Holiwis")),
+            SizedBox(height: 50),
+            TextField(
+              obscureText: false,
+              decoration: InputDecoration(border: OutlineInputBorder(),
+              labelText: 'Nombre(s)'),
+            ),
             SizedBox(height: 10),
             ElevatedButton(onPressed: () {}, child: Text("Holiwis")),
           ],

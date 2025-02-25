@@ -11,7 +11,7 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'HF',
+      title: 'HFE',
       // INICIALIZAMOS LAS RUTAS CON LA GOBLALIZACION DE SI MISMAS
       initialRoute: AppRoute.inicialRoute,
       routes: AppRoute.getMenuRoutes(),
