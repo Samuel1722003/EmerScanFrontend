@@ -17,6 +17,13 @@ class HomeScreen extends StatelessWidget {
                 labelText: 'Nombre(s)',
               ),
             ),
+            TextField(
+              obscureText: false,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Apellido(s)',
+              ),
+            ),
             SizedBox(height: 10),
             ElevatedButton(onPressed: () {}, child: Text("Holiwis")),
             ElevatedButton(onPressed: () {}, child: Text("Serapio")),
