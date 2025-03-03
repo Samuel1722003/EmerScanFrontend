@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:hfe_frontend/routes/app_routes.dart';
+
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -6,6 +8,33 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+
+      //Inicio del menu
+      appBar: AppBar(title: Text(" ")),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            DrawerHeader(
+              decoration: BoxDecoration(color: Colors.blue),
+              child: Text(
+                'Menú de Navegación',
+                style: TextStyle(color: Colors.white, fontSize: 20),
+              ),
+            ),
+            ...AppRoute.menuOptions.map((option) => ListTile(
+                  leading: Icon(option.icon),
+                  title: Text(option.title),
+                  onTap: () {
+                    Navigator.pushNamed(context, option.route);
+                  },
+                )),
+          ],
+        ),
+      ),
+
+      //Final del Menu
+
       body: Center(
         child: Column(
           children: [
@@ -30,6 +59,7 @@ class HomeScreen extends StatelessWidget {
             ElevatedButton(onPressed: () {}, child: Text("pachulin")),
             ElevatedButton(onPressed: () {}, child: Text("Belemchin")),
             ElevatedButton(onPressed: () {}, child: Text("Emiliachin")),
+            
           ],
         ),
       ),
