@@ -4,3 +4,5 @@ library;
 export 'package:hfe_frontend/screens/error.dart';
 export 'package:hfe_frontend/screens/home.dart';
 export 'package:hfe_frontend/screens/register.dart';
+export 'package:hfe_frontend/widgets/MenuButton.dart';
+export 'package:hfe_frontend/screens/screen_personal_data.dart';

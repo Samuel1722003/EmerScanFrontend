@@ -19,7 +19,7 @@ class MenuButton extends StatelessWidget {
       child: Column(
         children: [
           Container(
-            width: 200, // cuadrado o casi cuadrado
+            width: 200, // cuadrado
             height: 200,
             decoration: BoxDecoration(
               color: Colors.blueGrey[50], // Color de fondo del botón

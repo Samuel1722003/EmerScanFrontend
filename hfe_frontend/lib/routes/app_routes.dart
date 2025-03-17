@@ -4,25 +4,31 @@ import 'package:hfe_frontend/screens/login.dart';
 import 'package:hfe_frontend/screens/screen.dart';
 
 class AppRoute {
-  static const inicialRoute = 'home';
+  static const initialRoute = 'home';
   static final menuOptions = <MenuOptions>{
     MenuOptions(
       route: 'HomeScreen',
       title: 'HomeScreen',
       screen: const HomeScreen(),
-      icon: Icons.list,
+      icon: Icons.home,
     ),
     MenuOptions(
       route: 'RegisterScreen',
       title: 'RegisterScreen',
       screen: const RegisterScreen(),
-      icon: Icons.list,
+      icon: Icons.person_add,
     ),
     MenuOptions(
       route: 'LoginScreen',
       title: 'LoginScreen',
       screen: const LoginScreen(),
-      icon: Icons.list,
+      icon: Icons.login,
+    ),
+    MenuOptions(
+      route: 'PersonalDataScreen', // Nueva ruta para Datos personales
+      title: 'Datos personales',
+      screen: const PersonalDataScreen(),
+      icon: Icons.person,
     ),
   };
 
@@ -30,15 +36,14 @@ class AppRoute {
     Map<String, Widget Function(BuildContext)> appRoutes = {};
     appRoutes.addAll({'home': (BuildContext context) => const HomeScreen()});
     for (final options in menuOptions) {
-      appRoutes
-          .addAll({options.route: (BuildContext context) => options.screen});
+      appRoutes.addAll({
+        options.route: (BuildContext context) => options.screen,
+      });
     }
     return appRoutes;
   }
 
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
-    return MaterialPageRoute(
-      builder: (context) => const ErrorScreen(),
-    );
+    return MaterialPageRoute(builder: (context) => const ErrorScreen());
   }
 }
