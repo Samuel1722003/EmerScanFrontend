@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hfe_frontend/routes/app_routes.dart';
-
+import 'package:hfe_frontend/widgets/MenuButton.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -8,58 +7,61 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
-      //Inicio del menu
-      appBar: AppBar(title: Text(" ")),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            DrawerHeader(
-              decoration: BoxDecoration(color: Colors.blue),
-              child: Text(
-                'Menú de Navegación',
-                style: TextStyle(color: Colors.white, fontSize: 20),
-              ),
-            ),
-            ...AppRoute.menuOptions.map((option) => ListTile(
-                  leading: Icon(option.icon),
-                  title: Text(option.title),
-                  onTap: () {
-                    Navigator.pushNamed(context, option.route);
-                  },
-                )),
-          ],
-        ),
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.lightBlue[50],
+        elevation: 0,
+        iconTheme: IconThemeData(color: Colors.black),
       ),
-
-      //Final del Menu
-
-      body: Center(
+      drawer: Drawer(
+        // Tu menú aquí si lo necesitas
+      ),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            SizedBox(height: 50),
-            TextField(
-              obscureText: false,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'Nombre(s)',
-              ),
-            ),
-            TextField(
-              obscureText: false,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'Apellido(s)',
-              ),
-            ),
             SizedBox(height: 10),
-            ElevatedButton(onPressed: () {}, child: Text("Holiwis")),
-            ElevatedButton(onPressed: () {}, child: Text("Serapio")),
-            ElevatedButton(onPressed: () {}, child: Text("pachulin")),
-            ElevatedButton(onPressed: () {}, child: Text("Belemchin")),
-            ElevatedButton(onPressed: () {}, child: Text("Emiliachin")),
             
+            // Texto de bienvenida
+            Text(
+              '¡Hola, Cristina!',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+            ),
+
+            // Línea divisoria gris debajo del título
+            SizedBox(height: 10),
+            Container(
+              height: 1,
+              width: double.infinity,
+              color: Colors.grey[400],
+            ),
+
+            SizedBox(height: 40),
+
+            // Primer botón: Datos personales
+            MenuButton(
+              icon: Icons.person,
+              text: 'Datos personales',
+              onTap: () {
+                // Acción del botón
+              },
+            ),
+
+            SizedBox(height: 30),
+
+            // Segundo botón: Datos médicos
+            MenuButton(
+              icon: Icons.medical_services,
+              text: 'Datos médicos',
+              onTap: () {
+                // Acción del botón
+              },
+            ),
           ],
         ),
       ),
