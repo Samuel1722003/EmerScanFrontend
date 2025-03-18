@@ -6,7 +6,7 @@ class MenuButton extends StatelessWidget {
   final String text;
   final VoidCallback onTap;
 
-  const MenuButton({
+  const MenuButton({super.key, 
     required this.icon,
     required this.text,
     required this.onTap,
