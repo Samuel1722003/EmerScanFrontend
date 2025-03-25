@@ -1,34 +1,45 @@
 import 'package:flutter/material.dart';
 
 class MedicalCard extends StatelessWidget {
-  final Color color;
-  final IconData icon;
   final String title;
+  final String content;
+  final IconData icon;
+  final Color color;
 
   const MedicalCard({
     super.key,
-    required this.color,
-    required this.icon,
     required this.title,
+    required this.content,
+    required this.icon,
+    required this.color,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.3),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, size: 30, color: Colors.black54),
-          const SizedBox(height: 5),
-          Text(
-            title,
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-        ],
+    return Card(
+      color: color,
+      elevation: 3,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Icon(icon, size: 40, color: Colors.white),
+            const SizedBox(height: 10),
+            Text(
+              title,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+            ),
+            const SizedBox(height: 5),
+            Text(
+              content,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 14, color: Colors.white70),
+            ),
+          ],
+        ),
       ),
     );
   }

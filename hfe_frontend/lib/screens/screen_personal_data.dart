@@ -9,11 +9,21 @@ class PersonalDataScreen extends StatefulWidget {
 
 class _PersonalDataScreenState extends State<PersonalDataScreen> {
   // Controladores de texto para los campos
-  final TextEditingController _firstNameController = TextEditingController(text: "Cristina Fernanda");
-  final TextEditingController _lastNameController = TextEditingController(text: "Contreras Soliz");
-  final TextEditingController _birthDateController = TextEditingController(text: "27-Julio-2003");
-  final TextEditingController _emergencyNameController = TextEditingController(text: "Cristina Soliz");
-  final TextEditingController _emergencyPhoneController = TextEditingController(text: "6677557004");
+  final TextEditingController _firstNameController = TextEditingController(
+    text: "Cristina Fernanda",
+  );
+  final TextEditingController _lastNameController = TextEditingController(
+    text: "Contreras Soliz",
+  );
+  final TextEditingController _birthDateController = TextEditingController(
+    text: "27-Julio-2003",
+  );
+  final TextEditingController _emergencyNameController = TextEditingController(
+    text: "Cristina Soliz",
+  );
+  final TextEditingController _emergencyPhoneController = TextEditingController(
+    text: "6677557004",
+  );
 
   // Valor seleccionado para el género
   String _selectedGender = "Femenino";
@@ -78,12 +88,18 @@ class _PersonalDataScreenState extends State<PersonalDataScreen> {
             SizedBox(height: 15),
 
             // Nombre del contacto de emergencia
-            _buildTextField('Nombre contacto de emergencia', _emergencyNameController),
+            _buildTextField(
+              'Nombre contacto de emergencia',
+              _emergencyNameController,
+            ),
 
             SizedBox(height: 15),
 
             // Número de contacto de emergencia
-            _buildTextField('Número contacto de emergencia', _emergencyPhoneController),
+            _buildTextField(
+              'Número contacto de emergencia',
+              _emergencyPhoneController,
+            ),
 
             SizedBox(height: 30),
 
@@ -148,12 +164,13 @@ class _PersonalDataScreenState extends State<PersonalDataScreen> {
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: _selectedGender,
-          items: ['Femenino', 'Masculino', 'Otro'].map((String value) {
-            return DropdownMenuItem<String>(
-              value: value,
-              child: Text(value),
-            );
-          }).toList(),
+          items:
+              ['Femenino', 'Masculino', 'Otro'].map((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
           onChanged: (newValue) {
             setState(() {
               _selectedGender = newValue!;
