@@ -5,7 +5,8 @@ import 'package:hfe_frontend/screens/screen.dart';
 
 class AppRoute {
   static const initialRoute = 'home';
-  static final menuOptions = <MenuOptions>{
+
+  static final List<MenuOptions> menuOptions = [
     MenuOptions(
       route: 'HomeScreen',
       title: 'HomeScreen',
@@ -25,20 +26,24 @@ class AppRoute {
       icon: Icons.login,
     ),
     MenuOptions(
-      route: 'PersonalDataScreen', // Nueva ruta para Datos personales
+      route: 'PersonalDataScreen',
       title: 'Datos personales',
       screen: const PersonalDataScreen(),
       icon: Icons.person,
     ),
-  };
+    MenuOptions(
+      route: 'MedicalDataScreen',
+      title: 'Datos Médicos',
+      screen: const ScreenMedicalData(),
+      icon: Icons.local_hospital,
+    ),
+  ];
 
   static Map<String, Widget Function(BuildContext)> getMenuRoutes() {
     Map<String, Widget Function(BuildContext)> appRoutes = {};
     appRoutes.addAll({'home': (BuildContext context) => const HomeScreen()});
     for (final options in menuOptions) {
-      appRoutes.addAll({
-        options.route: (BuildContext context) => options.screen,
-      });
+      appRoutes[options.route] = (BuildContext context) => options.screen;
     }
     return appRoutes;
   }

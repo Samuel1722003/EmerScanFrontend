@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:hfe_frontend/screens/screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -11,7 +10,7 @@ class HomeScreen extends StatelessWidget {
         title: const Text('¡Hola, Cristina!'),
         backgroundColor: Colors.lightBlue[50],
       ),
-      drawer: _buildDrawer(context), // Aquí agregamos el menú lateral
+      drawer: _buildDrawer(context), // Menú lateral
       body: _buildBody(context),
     );
   }
@@ -40,20 +39,16 @@ class HomeScreen extends StatelessWidget {
             leading: Icon(Icons.person),
             title: Text('Datos personales'),
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const PersonalDataScreen()),
-              );
+              Navigator.pushNamed(context, 'PersonalDataScreen');
             },
           ),
 
-          // Opción Datos médicos (de ejemplo)
+          // Opción Datos médicos
           ListTile(
             leading: Icon(Icons.medical_services),
             title: Text('Datos médicos'),
             onTap: () {
-              // Por ahora no hacemos nada o podemos enviar a otra pantalla
-              Navigator.pop(context);
+              Navigator.pushNamed(context, 'MedicalDataScreen');
             },
           ),
 
@@ -88,28 +83,25 @@ class HomeScreen extends StatelessWidget {
 
           SizedBox(height: 30),
 
-          // Botón Datos personales (cuadrado)
+          // Botón Datos personales
           _buildHomeButton(
             context,
             icon: Icons.person,
             label: 'Datos personales',
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const PersonalDataScreen()),
-              );
+              Navigator.pushNamed(context, 'PersonalDataScreen');
             },
           ),
 
           SizedBox(height: 20),
 
-          // Botón Datos médicos (cuadrado)
+          // Botón Datos médicos
           _buildHomeButton(
             context,
             icon: Icons.medical_services,
             label: 'Datos médicos',
             onTap: () {
-              // Aquí puedes navegar a otra pantalla si la tienes
+              Navigator.pushNamed(context, 'MedicalDataScreen');
             },
           ),
         ],
