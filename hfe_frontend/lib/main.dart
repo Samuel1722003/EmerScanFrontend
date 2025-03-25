@@ -13,7 +13,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'HFE Frontend',
-      initialRoute: AppRoute.initialRoute,// ← La ruta inicial, por ejemplo 'home'
+      initialRoute: AppRoute.initialRoute,// ← La ruta inicial, la cual es 'home'
       routes: AppRoute.getMenuRoutes(),    // ← Aquí van todas las rutas del menú
       onGenerateRoute: AppRoute.onGenerateRoute, // ← Si se va por una ruta que no existe
       theme: ThemeData(
