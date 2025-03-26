@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:hfe_frontend/screens/screen.dart';
-import 'package:hfe_frontend/widgets/inputText.dart';
+import 'package:hfe_frontend/screens/widgets.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});

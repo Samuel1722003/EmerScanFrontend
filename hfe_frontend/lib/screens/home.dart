@@ -17,50 +17,76 @@ class HomeScreen extends StatelessWidget {
 
   Widget _buildDrawer(BuildContext context) {
     return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
+      child: Column(
         children: [
-          // Header del Drawer
-          DrawerHeader(
-            decoration: BoxDecoration(
-              color: Colors.lightBlue[50],
+          // Encabezado con imagen y nombre
+          UserAccountsDrawerHeader(
+            decoration: BoxDecoration(color: Colors.lightBlue[50]),
+            currentAccountPicture: CircleAvatar(
+              backgroundColor: Colors.white,
+              child: Icon(Icons.person, size: 50, color: Colors.grey),
             ),
-            child: Text(
-              'Menú',
+            accountName: Text(
+              'Cristina',
               style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
                 color: Colors.black87,
-                fontSize: 24,
               ),
             ),
+            accountEmail: null,
           ),
 
-          // Opción Datos personales
-          ListTile(
-            leading: Icon(Icons.person),
-            title: Text('Datos personales'),
-            onTap: () {
-              Navigator.pushNamed(context, 'PersonalDataScreen');
-            },
-          ),
+          // Opciones de menú
+          Expanded(
+            child: Column(
+              children: [
+                // Opción Datos personales
+                ListTile(
+                  leading: Icon(Icons.person, color: Colors.blueGrey),
+                  title: Text(
+                    'Datos personales',
+                    style: TextStyle(color: Colors.black87),
+                  ),
+                  onTap: () {
+                    Navigator.pushNamed(context, 'PersonalDataScreen');
+                  },
+                ),
 
-          // Opción Datos médicos
-          ListTile(
-            leading: Icon(Icons.medical_services),
-            title: Text('Datos médicos'),
-            onTap: () {
-              Navigator.pushNamed(context, 'MedicalDataScreen');
-            },
-          ),
+                // Opción Datos médicos
+                ListTile(
+                  leading: Icon(Icons.medical_services, color: Colors.blueGrey),
+                  title: Text(
+                    'Datos médicos',
+                    style: TextStyle(color: Colors.black87),
+                  ),
+                  onTap: () {
+                    Navigator.pushNamed(context, 'MedicalDataScreen');
+                  },
+                ),
 
-          Divider(),
+                Divider(),
 
-          // Cerrar sesión
-          ListTile(
-            leading: Icon(Icons.logout),
-            title: Text('Cerrar sesión'),
-            onTap: () {
-              Navigator.pushReplacementNamed(context, 'LoginScreen');
-            },
+                ListTile(
+                  leading: Icon(Icons.settings, color: Colors.grey[700]),
+                  title: Text(
+                    'Ajustes',
+                    style: TextStyle(color: Colors.grey[700]),
+                  ),
+                  onTap: () {},
+                ),
+                ListTile(
+                  leading: Icon(Icons.exit_to_app, color: Colors.grey[700]),
+                  title: Text(
+                    'Salir',
+                    style: TextStyle(color: Colors.grey[700]),
+                  ),
+                  onTap: () {
+                    Navigator.pushReplacementNamed(context, 'LoginScreen');
+                  },
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -109,7 +135,12 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHomeButton(BuildContext context, {required IconData icon, required String label, required Function() onTap}) {
+  Widget _buildHomeButton(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required Function() onTap,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: Column(
@@ -121,11 +152,7 @@ class HomeScreen extends StatelessWidget {
               color: Colors.blueGrey[50],
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(
-              icon,
-              size: 70,
-              color: Colors.blueGrey,
-            ),
+            child: Icon(icon, size: 70, color: Colors.blueGrey),
           ),
           SizedBox(height: 10),
           Text(

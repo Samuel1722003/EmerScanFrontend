@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hfe_frontend/screens/widgets.dart';
 
 class PersonalDataScreen extends StatefulWidget {
   const PersonalDataScreen({super.key});
@@ -8,7 +9,6 @@ class PersonalDataScreen extends StatefulWidget {
 }
 
 class _PersonalDataScreenState extends State<PersonalDataScreen> {
-  // Controladores de texto para los campos
   final TextEditingController _firstNameController = TextEditingController(
     text: "Cristina Fernanda",
   );
@@ -25,157 +25,128 @@ class _PersonalDataScreenState extends State<PersonalDataScreen> {
     text: "6677557004",
   );
 
-  // Valor seleccionado para el género
   String _selectedGender = "Femenino";
+  bool _isEditing = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-
       appBar: AppBar(
         backgroundColor: Colors.lightBlue[50],
         elevation: 0,
-        iconTheme: IconThemeData(color: Colors.black),
+        iconTheme: const IconThemeData(color: Colors.black),
       ),
-
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            SizedBox(height: 10),
-
-            // Título
-            Text(
+            const SizedBox(height: 10),
+            const Text(
               'Datos personales',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
-              ),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
-
-            // Línea divisoria
-            SizedBox(height: 10),
-            Container(
-              height: 1,
-              width: double.infinity,
-              color: Colors.grey[400],
+            const SizedBox(height: 10),
+            Divider(color: Colors.grey[400]),
+            const SizedBox(height: 20),
+            CustomTextField(
+              label: 'Nombres',
+              controller: _firstNameController,
+              isEditable: _isEditing,
             ),
-
-            SizedBox(height: 20),
-
-            // Campo Nombres
-            _buildTextField('Nombres', _firstNameController),
-
-            SizedBox(height: 15),
-
-            // Campo Apellidos
-            _buildTextField('Apellidos', _lastNameController),
-
-            SizedBox(height: 15),
-
-            // Campo Fecha de nacimiento
-            _buildTextField('Fecha de nacimiento', _birthDateController),
-
-            SizedBox(height: 15),
-
-            // Selector de Género
-            _buildDropdownGender(),
-
-            SizedBox(height: 15),
-
-            // Nombre del contacto de emergencia
-            _buildTextField(
-              'Nombre contacto de emergencia',
-              _emergencyNameController,
+            const SizedBox(height: 15),
+            CustomTextField(
+              label: 'Apellidos',
+              controller: _lastNameController,
+              isEditable: _isEditing,
             ),
-
-            SizedBox(height: 15),
-
-            // Número de contacto de emergencia
-            _buildTextField(
-              'Número contacto de emergencia',
-              _emergencyPhoneController,
+            const SizedBox(height: 15),
+            CustomTextField(
+              label: 'Fecha de nacimiento',
+              controller: _birthDateController,
+              isEditable: _isEditing,
             ),
-
-            SizedBox(height: 30),
-
-            // Botón Guardar
+            const SizedBox(height: 15),
+            _isEditing
+                ? GenderDropdownWidget(
+                  selectedGender: _selectedGender,
+                  onChanged: (newValue) {
+                    if (_isEditing) {
+                      setState(() {
+                        _selectedGender = newValue!;
+                      });
+                    }
+                  },
+                  isEditable: _isEditing,
+                )
+                : CustomTextField(
+                  label: 'Género',
+                  controller: TextEditingController(text: _selectedGender),
+                  isEditable: false,
+                ),
+            const SizedBox(height: 15),
+            CustomTextField(
+              label: 'Nombre contacto de emergencia',
+              controller: _emergencyNameController,
+              isEditable: _isEditing,
+            ),
+            const SizedBox(height: 15),
+            CustomTextField(
+              label: 'Número contacto de emergencia',
+              controller: _emergencyPhoneController,
+              isEditable: _isEditing,
+            ),
+            const SizedBox(height: 30),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
                 onPressed: () {
-                  // Acción de guardar los datos
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Datos guardados correctamente')),
-                  );
+                  setState(() {
+                    _isEditing = !_isEditing;
+                  });
                 },
-                icon: Icon(Icons.check),
-                label: Text('Guardar'),
+                icon: Icon(
+                  _isEditing ? Icons.check : Icons.edit,
+                  color: Colors.white,
+                ),
+                label: Text(
+                  _isEditing ? 'Guardar' : 'Editar datos',
+                  style: const TextStyle(color: Colors.white),
+                ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.teal, // Color verde como en la imagen
-                  padding: EdgeInsets.symmetric(vertical: 15),
-                  textStyle: TextStyle(fontSize: 16),
+                  backgroundColor: _isEditing ? Colors.teal : Colors.blueAccent,
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                  textStyle: const TextStyle(fontSize: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
               ),
             ),
+            if (_isEditing) ...[
+              const SizedBox(height: 10),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      _isEditing = false;
+                    });
+                  },
+                  child: const Text('Cancelar', selectionColor: Colors.white,),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.redAccent,
+                    padding: const EdgeInsets.symmetric(vertical: 15),
+                    textStyle: const TextStyle(fontSize: 16, color: Colors.white),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ],
-        ),
-      ),
-    );
-  }
-
-  // Widget para construir un campo de texto
-  Widget _buildTextField(String label, TextEditingController controller) {
-    return TextField(
-      controller: controller,
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: TextStyle(color: Colors.grey[700]),
-        fillColor: Colors.grey[100],
-        filled: true,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(6),
-          borderSide: BorderSide(color: Colors.grey.shade400),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(6),
-          borderSide: BorderSide(color: Colors.blueAccent),
-        ),
-      ),
-    );
-  }
-
-  // Widget para el Dropdown de género
-  Widget _buildDropdownGender() {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: Colors.grey.shade400),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: _selectedGender,
-          items:
-              ['Femenino', 'Masculino', 'Otro'].map((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
-          onChanged: (newValue) {
-            setState(() {
-              _selectedGender = newValue!;
-            });
-          },
         ),
       ),
     );
