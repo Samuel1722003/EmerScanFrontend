@@ -9,25 +9,25 @@ class AppRoute {
   static final List<MenuOptions> menuOptions = [
     MenuOptions(
       route: 'HomeScreen',
-      title: 'HomeScreen',
+      title: 'Inicio',
       screen: const HomeScreen(),
       icon: Icons.home,
     ),
     MenuOptions(
       route: 'RegisterScreen',
-      title: 'RegisterScreen',
+      title: 'Registro',
       screen: const RegisterScreen(),
       icon: Icons.person_add,
     ),
     MenuOptions(
       route: 'LoginScreen',
-      title: 'LoginScreen',
+      title: 'Iniciar Sesión',
       screen: const LoginScreen(),
       icon: Icons.login,
     ),
     MenuOptions(
       route: 'PersonalDataScreen',
-      title: 'Datos personales',
+      title: 'Datos Personales',
       screen: const PersonalDataScreen(),
       icon: Icons.person,
     ),
@@ -36,6 +36,12 @@ class AppRoute {
       title: 'Datos Médicos',
       screen: const ScreenMedicalData(),
       icon: Icons.local_hospital,
+    ),
+    MenuOptions(
+      route: 'SettingsScreen',
+      title: 'Ajustes',
+      screen: const SettingsScreen(),
+      icon: Icons.settings,
     ),
   ];
 

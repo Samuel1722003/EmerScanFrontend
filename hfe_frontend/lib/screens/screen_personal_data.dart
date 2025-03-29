@@ -134,7 +134,6 @@ class _PersonalDataScreenState extends State<PersonalDataScreen> {
                       _isEditing = false;
                     });
                   },
-                  child: const Text('Cancelar', selectionColor: Colors.white,),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.redAccent,
                     padding: const EdgeInsets.symmetric(vertical: 15),
@@ -143,6 +142,7 @@ class _PersonalDataScreenState extends State<PersonalDataScreen> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
+                  child: const Text('Cancelar', selectionColor: Colors.white,),
                 ),
               ),
             ],

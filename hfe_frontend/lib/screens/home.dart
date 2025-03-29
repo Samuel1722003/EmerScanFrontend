@@ -73,7 +73,9 @@ class HomeScreen extends StatelessWidget {
                     'Ajustes',
                     style: TextStyle(color: Colors.grey[700]),
                   ),
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.pushNamed(context, 'SettingsScreen');
+                  },
                 ),
                 ListTile(
                   leading: Icon(Icons.exit_to_app, color: Colors.grey[700]),
