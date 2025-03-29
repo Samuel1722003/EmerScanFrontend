@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hfe_frontend/screens/screen.dart';
 import 'package:hfe_frontend/screens/widgets.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -31,25 +32,49 @@ class SettingsScreen extends StatelessWidget {
               icon: Icons.format_paint,
               label: "Personalización",
               color: Colors.amberAccent,
-              onTap: () {}, // Acción al presionar
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const PersonalizationScreen(),
+                  ),
+                );
+              }, // Acción al presionar
             ),
             SettingsOption(
               icon: Icons.notifications,
               label: "Notificaciones",
               color: Colors.purpleAccent,
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const NotificationsScreen(),
+                  ),
+                );
+              },
             ),
             SettingsOption(
               icon: Icons.lock,
               label: "Seguridad y privacidad",
               color: Colors.cyan,
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const SecurityScreen()),
+                );
+              },
             ),
             SettingsOption(
               icon: Icons.headset_mic,
               label: "Ayuda y soporte",
               color: Colors.pinkAccent,
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const SupportScreen()),
+                );
+              },
             ),
           ],
         ),
