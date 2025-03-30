@@ -10,3 +10,6 @@ export 'package:hfe_frontend/widgets/ThemeSwitch.dart';
 export 'package:hfe_frontend/widgets/LenguageSelector.dart';
 export 'package:hfe_frontend/widgets/TextSizeSlider.dart';
 export 'package:hfe_frontend/widgets/BoldTextSwitch.dart';
+export 'package:hfe_frontend/widgets/CustomProgressBar.dart';
+export 'package:hfe_frontend/widgets/SignUpTextField.dart';
+export 'package:hfe_frontend/widgets/SignUpDropDown.dart';

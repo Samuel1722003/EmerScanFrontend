@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hfe_frontend/models/menu_options.dart';
-import 'package:hfe_frontend/screens/login.dart';
+import 'package:hfe_frontend/screens/login_screen.dart';
 import 'package:hfe_frontend/screens/screen.dart';
 
 class AppRoute {
@@ -16,7 +16,7 @@ class AppRoute {
     MenuOptions(
       route: 'RegisterScreen',
       title: 'Registro',
-      screen: const RegisterScreen(),
+      screen: const SignUpScreen1(),
       icon: Icons.person_add,
     ),
     MenuOptions(
