@@ -14,6 +14,12 @@ class AppRoute {
       icon: Icons.home,
     ),
     MenuOptions(
+      route: 'LoginScreen',
+      title: 'Iniciar Sesión',
+      screen: const LoginScreen(),
+      icon: Icons.login,
+    ),
+    MenuOptions(
       route: 'RegisterScreen',
       title: 'Registro',
       screen: const SignUpScreen1(),
@@ -36,12 +42,6 @@ class AppRoute {
       title: 'Registro4',
       screen: const SignUpScreen4(),
       icon: Icons.person_add,
-    ),
-    MenuOptions(
-      route: 'LoginScreen',
-      title: 'Iniciar Sesión',
-      screen: const LoginScreen(),
-      icon: Icons.login,
     ),
     MenuOptions(
       route: 'PersonalDataScreen',
