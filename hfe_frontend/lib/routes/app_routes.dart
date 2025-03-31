@@ -20,6 +20,24 @@ class AppRoute {
       icon: Icons.person_add,
     ),
     MenuOptions(
+      route: 'RegisterScreen2',
+      title: 'Registro2',
+      screen: const SignUpScreen2(),
+      icon: Icons.person_add,
+    ),
+    MenuOptions(
+      route: 'RegisterScreen3',
+      title: 'Registro3',
+      screen: const SignUpScreen3(),
+      icon: Icons.person_add,
+    ),
+    MenuOptions(
+      route: 'RegisterScreen4',
+      title: 'Registro4',
+      screen: const SignUpScreen4(),
+      icon: Icons.person_add,
+    ),
+    MenuOptions(
       route: 'LoginScreen',
       title: 'Iniciar Sesión',
       screen: const LoginScreen(),
@@ -41,6 +59,30 @@ class AppRoute {
       route: 'SettingsScreen',
       title: 'Ajustes',
       screen: const SettingsScreen(),
+      icon: Icons.settings,
+    ),
+    MenuOptions(
+      route: 'PersonalizationScreen',
+      title: 'Personalizacion',
+      screen: const PersonalizationScreen(),
+      icon: Icons.settings,
+    ),
+    MenuOptions(
+      route: 'NotificationsScreen',
+      title: 'Notificaciones',
+      screen: const NotificationsScreen(),
+      icon: Icons.settings,
+    ),
+    MenuOptions(
+      route: 'SecurityScreen',
+      title: 'Seguridad',
+      screen: const SecurityScreen(),
+      icon: Icons.settings,
+    ),
+    MenuOptions(
+      route: 'SupportScreen',
+      title: 'Soporte',
+      screen: const SupportScreen(),
       icon: Icons.settings,
     ),
   ];

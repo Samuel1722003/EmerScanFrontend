@@ -31,7 +31,7 @@ class ErrorScreen extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               Text(
-                'Por favor intenta despues.',
+                'Por favor intenta despues...',
                 style: TextStyle(
                   fontSize: 16,
                   color: Colors.red.shade500,
@@ -41,12 +41,12 @@ class ErrorScreen extends StatelessWidget {
               const SizedBox(height: 30),
               ElevatedButton(
                 onPressed: () {
-                  Navigator.pop(context); // Navega a la pantalla anterior
+                  Navigator.pop(context);
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red.shade700, // Usamos backgroundColor en lugar de primary
+                  backgroundColor: Colors.red.shade700,
                 ),
-                child: const Text('Go Back'),
+                child: const Text('Regresar'),
               ),
             ],
           ),

@@ -10,16 +10,16 @@ class SignUpScreen1 extends StatefulWidget {
 
 class _SignUpScreen1State extends State<SignUpScreen1> {
   final _formKey = GlobalKey<FormState>();
-  final _numbersController = TextEditingController();
-  final _aquillitosController = TextEditingController();
+  final _nameController = TextEditingController();
+  final _lastNameController = TextEditingController();
   final _birthDateController = TextEditingController();
-  String _cuerpoValue = '';
+  String _genderValue = '';
   final _phoneController = TextEditingController();
 
   @override
   void dispose() {
-    _numbersController.dispose();
-    _aquillitosController.dispose();
+    _nameController.dispose();
+    _lastNameController.dispose();
     _birthDateController.dispose();
     _phoneController.dispose();
     super.dispose();
@@ -35,69 +35,39 @@ class _SignUpScreen1State extends State<SignUpScreen1> {
           key: _formKey,
           child: Column(
             children: [
-              // Barra de progreso al 25%
               const CustomProgressBar(progress: 0.25),
               const SizedBox(height: 20),
               const Text(
-                'Ingresa tus datos',
+                'Datos personales',
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 30),
-
-              // Campos con widgets personalizados
+              SignUpTextField(label: 'Nombres', controller: _nameController),
+              const SizedBox(height: 20),
               SignUpTextField(
-                label: 'Nombre(s)',
-                hint: 'Ej: Cristina',
-                controller: _numbersController,
-                validator:
-                    (value) => value!.isEmpty ? 'Campo obligatorio' : null,
+                label: 'Apellidos',
+                controller: _lastNameController,
               ),
               const SizedBox(height: 20),
-
-              SignUpTextField(
-                label: 'Apellido(s)',
-                hint: 'Ej: Soliz',
-                controller: _aquillitosController,
-                validator:
-                    (value) => value!.isEmpty ? 'Campo obligatorio' : null,
-              ),
-              const SizedBox(height: 20),
-
               SignUpTextField(
                 label: 'Fecha de nacimiento',
-                isDate: true,
                 controller: _birthDateController,
-                validator:
-                    (value) => value!.isEmpty ? 'Selecciona una fecha' : null,
+                isDate: true,
               ),
               const SizedBox(height: 20),
-
               SignUpDropdown(
-                label: 'Genero',
+                label: 'Género',
                 items: const ['Masculino', 'Femenino'],
-                onChanged: (value) => _cuerpoValue = value ?? '',
-                validator:
-                    (value) => value == null ? 'Selecciona una opción' : null,
+                onChanged: (value) => _genderValue = value ?? '',
               ),
               const SizedBox(height: 20),
-
-              SignUpTextField(
-                label: 'Teléfono',
-                hint: 'Ej: +52 6672435670',
-                controller: _phoneController,
-                validator:
-                    (value) => value!.isEmpty ? 'Campo obligatorio' : null,
-              ),
+              SignUpTextField(label: 'Teléfono', controller: _phoneController),
               const SizedBox(height: 40),
-
-              // Botón
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      Navigator.pushNamed(context, '/signup2');
-                    }
+                    Navigator.pushNamed(context, 'RegisterScreen2');
                   },
                   child: const Text('Continuar'),
                 ),
