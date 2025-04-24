@@ -38,6 +38,7 @@ dependencies:
   path: ^1.9.1
   supabase_flutter: ^2.8.4
   flutter_tabler_icons: ^1.43.0
+  qr_flutter: ^4.1.0
 
 dev_dependencies:
   flutter_test:
