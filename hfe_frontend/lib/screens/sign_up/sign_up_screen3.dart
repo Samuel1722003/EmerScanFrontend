@@ -12,9 +12,20 @@ class SignUpScreen3 extends StatefulWidget {
 
 class _SignUpScreen3State extends State<SignUpScreen3> {
   bool _isLoading = false;
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final signUpData = ModalRoute.of(context)!.settings.arguments as Persona;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Registro (3/4)'),
@@ -34,14 +45,20 @@ class _SignUpScreen3State extends State<SignUpScreen3> {
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 30),
-            SignUpTextField(label: 'Correo'),
+            SignUpTextField(
+              label: 'Confirma tu correo',
+              controller: _emailController,
+            ),
             const SizedBox(height: 20),
-            SignUpTextField(label: 'Contraseña'),
+            SignUpTextField(
+              label: 'Confirma tu contraseña',
+              controller: _passwordController
+            ),
             const SizedBox(height: 40),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: _isLoading ? null : _crearCuenta,
+                onPressed: _isLoading ? null : () => _crearCuenta(signUpData),
                 child:
                     _isLoading
                         ? const CircularProgressIndicator()
@@ -54,63 +71,55 @@ class _SignUpScreen3State extends State<SignUpScreen3> {
     );
   }
 
-  Future<void> _crearCuenta() async {
+  Future<void> _crearCuenta(Persona signUpData) async {
+    // Validar que los datos coincidan
+    if (_emailController.text != signUpData.correo || 
+        _passwordController.text != signUpData.contrasena) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('El correo o contraseña no coinciden con los datos ingresados anteriormente.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     try {
       setState(() {
         _isLoading = true;
       });
 
-      final signUpData = ModalRoute.of(context)!.settings.arguments as Persona;
       final supabase = Supabase.instance.client;
-
-      // Código de diagnóstico
-      print('URL de Supabase: ${'https://dmvgtocktnzamzaqvybr.supabase.co'}');
-      print('Verificando conexión a Supabase...');
-
-      try {
-        // Intenta listar las tablas disponibles
-        final tablesResponse = await supabase.rpc('list_tables');
-        print('Tablas disponibles: $tablesResponse');
-      } catch (e) {
-        print('Error al listar tablas: $e');
+      
+      // Verificar si el correo ya existe en la base de datos
+      final existingUsers = await supabase
+          .from('usuario_persona')
+          .select('correo')
+          .eq('correo', signUpData.correo);
+      
+      if (existingUsers.isNotEmpty) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Este correo electrónico ya está registrado. Por favor, utiliza otro.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        setState(() {
+          _isLoading = false;
+        });
+        return;
       }
 
-      try {
-        // Intenta una consulta simple
-        final testResponse = await supabase
-            .from('usuario_persona')
-            .select('id')
-            .limit(1);
-        print('Consulta de prueba exitosa: $testResponse');
-      } catch (e) {
-        print('Error en consulta de prueba: $e');
-      }
-
-      // Reformatear la fecha para que sea compatible con PostgreSQL
-      // Asumiendo que signUpData.fechaNacimiento está en formato "DD/MM/YYYY"
-      String formattedDate;
-
-      try {
-        // Parsear la fecha original
-        final dateParts = signUpData.fechaNacimiento.split('/');
-        if (dateParts.length == 3) {
-          // Reformatear a 'YYYY-MM-DD'
-          formattedDate = '${dateParts[2]}-${dateParts[1]}-${dateParts[0]}';
-        } else {
-          formattedDate =
-              signUpData
-                  .fechaNacimiento; // Usar el original si no podemos parsear
-        }
-      } catch (e) {
-        // Si hay un error al parsear, intentamos usar un formato estándar
-        formattedDate = signUpData.fechaNacimiento;
-      }
+      // Reformatear la fecha con ceros iniciales
+      final dateParts = signUpData.fechaNacimiento.split('/');
+      final formattedDate =
+          '${dateParts[2]}-${dateParts[1].padLeft(2, '0')}-${dateParts[0].padLeft(2, '0')}';
 
       print('Fecha original: ${signUpData.fechaNacimiento}');
       print('Fecha formateada: $formattedDate');
 
-      // Insertar en la tabla Usuario_Persona con la fecha correctamente formateada
-      await supabase.from('Usuario_Persona').insert({
+      await supabase.from('usuario_persona').insert({
         'correo': signUpData.correo,
         'contrasena': signUpData.contrasena,
         'nombre': signUpData.nombre,
@@ -119,24 +128,25 @@ class _SignUpScreen3State extends State<SignUpScreen3> {
             signUpData.apellidos.split(' ').length > 1
                 ? signUpData.apellidos.split(' ').last
                 : '',
-        'fecha_nacimiento': formattedDate, // Usar la fecha formateada
+        'fecha_nacimiento': formattedDate,
         'genero': signUpData.genero,
         'telefono': signUpData.telefono,
       });
 
-      if (!mounted) return;
+      print('Inserción exitosa con usuario_persona');
 
+      if (!mounted) return;
       Navigator.pushNamed(context, 'RegisterScreen4');
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error al crear cuenta: ${e.toString()}'),
-            duration: Duration(seconds: 5),
+            duration: const Duration(seconds: 5),
           ),
         );
       }
-      print('Error detallado: $e');
+      print('Error detallado final: $e');
     } finally {
       if (mounted) {
         setState(() {

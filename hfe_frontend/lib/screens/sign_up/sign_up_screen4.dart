@@ -25,7 +25,7 @@ class SignUpScreen4 extends StatelessWidget {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  Navigator.pushNamed(context, '/login');
+                  Navigator.pushNamed(context, 'LoginScreen');
                 },
                 child: const Text('Iniciar Sesión'),
               ),
