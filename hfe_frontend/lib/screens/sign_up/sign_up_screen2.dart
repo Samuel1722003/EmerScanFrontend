@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hfe_frontend/screens/widgets.dart';
+import 'package:hfe_frontend/screens/screen.dart';
 
 class SignUpScreen2 extends StatefulWidget {
   const SignUpScreen2({super.key});
@@ -22,6 +23,8 @@ class _SignUpScreen2State extends State<SignUpScreen2> {
 
   @override
   Widget build(BuildContext context) {
+    final datosPersona = ModalRoute.of(context)!.settings.arguments as Persona;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Registro (2/4)'),
@@ -54,7 +57,15 @@ class _SignUpScreen2State extends State<SignUpScreen2> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
-                    Navigator.pushNamed(context, 'RegisterScreen3');
+                    datosPersona
+                      ..correo = _emailController.text
+                      ..contrasena = _passwordController.text;
+
+                    Navigator.pushNamed(
+                      context,
+                      'RegisterScreen3',
+                      arguments: datosPersona,
+                    );
                   },
                   child: const Text('Continuar'),
                 ),

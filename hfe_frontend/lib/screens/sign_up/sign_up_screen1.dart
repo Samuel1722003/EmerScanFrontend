@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hfe_frontend/screens/widgets.dart';
+import 'package:hfe_frontend/screens/screen.dart';
 
 class SignUpScreen1 extends StatefulWidget {
   const SignUpScreen1({super.key});
@@ -67,7 +68,18 @@ class _SignUpScreen1State extends State<SignUpScreen1> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
-                    Navigator.pushNamed(context, 'RegisterScreen2');
+                    final datosPersona =
+                        Persona()
+                          ..nombre = _nameController.text
+                          ..apellidos = _lastNameController.text
+                          ..fechaNacimiento = _birthDateController.text
+                          ..genero = _genderValue
+                          ..telefono = _phoneController.text;
+                    Navigator.pushNamed(
+                      context,
+                      'RegisterScreen2',
+                      arguments: datosPersona,
+                    );
                   },
                   child: const Text('Continuar'),
                 ),
