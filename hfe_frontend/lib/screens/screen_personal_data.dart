@@ -36,8 +36,8 @@ class _PersonalDataScreenState extends State<PersonalDataScreen> {
           "${response['apellido_paterno'] ?? ''} ${response['apellido_materno'] ?? ''}".trim();
       _birthDateController.text = response['fecha_nacimiento'] ?? '';
       _selectedGender = response['genero'] ?? 'Femenino';
-      _emergencyNameController.text = response['nombre_contacto_emergencia'] ?? '';
-      _emergencyPhoneController.text = response['telefono_contacto_emergencia'] ?? '';
+      //_emergencyNameController.text = response['nombre_contacto_emergencia'] ?? '';
+      //_emergencyPhoneController.text = response['telefono_contacto_emergencia'] ?? '';
       setState(() {});
     }
   }
@@ -55,8 +55,8 @@ class _PersonalDataScreenState extends State<PersonalDataScreen> {
       'apellido_materno': apellidoMaterno,
       'fecha_nacimiento': _birthDateController.text.trim(),
       'genero': _selectedGender,
-      'nombre_contacto_emergencia': _emergencyNameController.text.trim(),
-      'telefono_contacto_emergencia': _emergencyPhoneController.text.trim(),
+      //'nombre_contacto_emergencia': _emergencyNameController.text.trim(),
+      //'telefono_contacto_emergencia': _emergencyPhoneController.text.trim(),
     }).eq('id','01bec088-a454-45b2-8c59-b7b24ea2a111-20250424184650-048029'); // Ajusta aquí el ID o condición según tu tabla
 
     if (!mounted) return;
