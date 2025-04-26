@@ -94,7 +94,7 @@ class _SignUpScreen3State extends State<SignUpScreen3> {
 
       final supabase = Supabase.instance.client;
 
-      // Verificar si el correo ya existe en la base de datos
+      // Verificar si el correo ya existe
       final existingUsers = await supabase
           .from('usuario_persona')
           .select('correo')
@@ -116,12 +116,12 @@ class _SignUpScreen3State extends State<SignUpScreen3> {
         return;
       }
 
-      // Reformatear la fecha con ceros iniciales
+      // Formatear fecha de nacimiento
       final dateParts = signUpData.fechaNacimiento.split('/');
       final formattedDate =
           '${dateParts[2]}-${dateParts[1].padLeft(2, '0')}-${dateParts[0].padLeft(2, '0')}';
 
-      // Insertar el nuevo usuario y obtener su ID
+      // Insertar el nuevo usuario (el UUID se generará automáticamente)
       final insertResponse =
           await supabase
               .from('usuario_persona')
@@ -143,9 +143,15 @@ class _SignUpScreen3State extends State<SignUpScreen3> {
 
       final usuarioId = insertResponse['id'];
 
-      // Generar el código QR con el ID del usuario
+      // Generar QR con el UUID de la base de datos
+      final qrData = jsonEncode({
+        'usuarioId': usuarioId,
+        'tipo': 'identificacion_medica',
+        'fechaGeneracion': DateTime.now().toIso8601String(),
+      });
+
       final qrValidationResult = QrValidator.validate(
-        data: usuarioId.toString(),
+        data: qrData,
         version: QrVersions.auto,
         errorCorrectionLevel: QrErrorCorrectLevel.Q,
       );
@@ -157,15 +163,13 @@ class _SignUpScreen3State extends State<SignUpScreen3> {
           color: const Color(0xFF000000),
           emptyColor: const Color(0xFFFFFFFF),
           gapless: true,
-          embeddedImageStyle: null,
-          embeddedImage: null,
         );
 
         final imageData = await painter.toImageData(200);
         final bytes = imageData!.buffer.asUint8List();
         final base64Qr = base64Encode(bytes);
 
-        // Actualizar el registro del usuario con el código QR en base64
+        // Actualizar el usuario con el QR generado
         await supabase
             .from('usuario_persona')
             .update({'codigo_qr_base64': base64Qr})
@@ -185,7 +189,7 @@ class _SignUpScreen3State extends State<SignUpScreen3> {
           ),
         );
       }
-      print('Error detallado final: $e');
+      print('Error detallado: $e');
     } finally {
       if (mounted) {
         setState(() {
