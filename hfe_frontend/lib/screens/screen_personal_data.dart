@@ -21,6 +21,7 @@ class _PersonalDataScreenState extends State<PersonalDataScreen> {
   String _selectedGender = "Femenino";
   bool _isEditing = false;
   bool _isLoading = false;
+  
   @override
   void initState() {
     super.initState();
@@ -32,37 +33,37 @@ class _PersonalDataScreenState extends State<PersonalDataScreen> {
   }
 
   Future<void> _loadUserData() async {
-  // Consulta de datos personales
-  final userResponse = await supabase
-      .from('usuario_persona')
-      .select()
-      .eq('id', getUserId())
-      .maybeSingle();
+    // Consulta de datos personales
+    final userResponse = await supabase
+        .from('usuario_persona')
+        .select()
+        .eq('id', getUserId())
+        .maybeSingle();
 
-  // Consulta de contacto de emergencia
-  final contactoResponse = await supabase
-      .from('contacto_emergencia')
-      .select()
-      .eq('usuario_persona_id', getUserId())
-      .maybeSingle();
+    // Consulta de contacto de emergencia
+    final contactoResponse = await supabase
+        .from('contacto_emergencia')
+        .select()
+        .eq('usuario_persona_id', getUserId())
+        .maybeSingle();
 
-  if (userResponse != null) {
-    _firstNameController.text = userResponse['nombre'] ?? '';
-    _lastNameController.text =
-        "${userResponse['apellido_paterno'] ?? ''} ${userResponse['apellido_materno'] ?? ''}".trim();
-    _birthDateController.text = userResponse['fecha_nacimiento'] ?? '';
-    _selectedGender = userResponse['genero'] ?? 'Femenino';
+    if (userResponse != null) {
+      _firstNameController.text = userResponse['nombre'] ?? '';
+      _lastNameController.text =
+          "${userResponse['apellido_paterno'] ?? ''} ${userResponse['apellido_materno'] ?? ''}".trim();
+      _birthDateController.text = userResponse['fecha_nacimiento'] ?? '';
+      _selectedGender = userResponse['genero'] ?? 'Femenino';
+    }
+
+    if (contactoResponse != null) {
+      _emergencyNameController.text = contactoResponse['nombre'] ?? '';
+      _emergencyPhoneController.text = contactoResponse['telefono'] ?? '';
+    }
+
+    setState(() {});
   }
 
-  if (contactoResponse != null) {
-    _emergencyNameController.text = contactoResponse['nombre'] ?? '';
-    _emergencyPhoneController.text = contactoResponse['telefono'] ?? '';
-  }
-
-  setState(() {});
-}
-
-  Future<void> _updateUserData() async {
+Future<void> _updateUserData() async {
   String apellidoPaterno = '';
   String apellidoMaterno = '';
   final apellidos = _lastNameController.text.trim().split(' ');
@@ -94,17 +95,26 @@ class _PersonalDataScreenState extends State<PersonalDataScreen> {
       'telefono': _emergencyPhoneController.text.trim(),
     }).eq('id', existingContact['id']);
   } else {
-    // Si no existe, lo inserta (puedes ajustar la relación según el campo "relacion")
+    // Si no existe, lo inserta
     await supabase.from('contacto_emergencia').insert({
       'nombre': _emergencyNameController.text.trim(),
       'telefono': _emergencyPhoneController.text.trim(),
       'usuario_persona_id': userId,
-      'relacion': 'Familiar', // Aquí puedes ajustar según tu tipo enum o clave foránea
+      'relacion': 'Familiar',
     });
   }
 
+  // Primero recargar los datos
+  await _loadUserData();
+  
   if (!mounted) return;
 
+  // Ahora cambiamos solo el estado de edición
+  setState(() {
+    _isEditing = false; // Cambia al botón azul
+  });
+
+  // Mostrar mensaje
   if (response.error != null) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Error al guardar: ${response.error!.message}')),
@@ -114,6 +124,9 @@ class _PersonalDataScreenState extends State<PersonalDataScreen> {
       const SnackBar(content: Text('Datos actualizados correctamente.')),
     );
   }
+  
+  // NO AGREGAR CÓDIGO DE NAVEGACIÓN AQUÍ
+  // Si tienes algo como Navigator.pop() o pushReplacement, quítalo
 }
 
   @override
@@ -121,10 +134,17 @@ class _PersonalDataScreenState extends State<PersonalDataScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.lightBlue[50],
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black),
-      ),
+  backgroundColor: Colors.lightBlue[50],
+  elevation: 0,
+  iconTheme: const IconThemeData(color: Colors.black),
+  automaticallyImplyLeading: true, // Esto controla el botón de retroceso
+  leading: IconButton(
+    icon: const Icon(Icons.arrow_back),
+    onPressed: () {
+      Navigator.of(context).pop(); // Esto solo regresa a la pantalla anterior, no a home
+    },
+  ),
+),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         child: Column(
@@ -186,58 +206,87 @@ class _PersonalDataScreenState extends State<PersonalDataScreen> {
               isEditable: _isEditing,
             ),
             const SizedBox(height: 30),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () async {
-                  if (_isEditing) {
-                      await _updateUserData();
-                      await _loadUserData();
-                  }
-                  setState(() {
-                    _isEditing = !_isEditing;
-                  });
-                },
-                icon: Icon(
-                  _isEditing ? Icons.check : Icons.edit,
-                  color: Colors.white,
-                ),
-                label: Text(
-                  _isEditing ? 'Guardar' : 'Editar datos',
-                  style: const TextStyle(color: Colors.white),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: _isEditing ? Colors.teal : Colors.blueAccent,
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                  textStyle: const TextStyle(fontSize: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-              ),
-            ),
-            if (_isEditing) ...[
-              const SizedBox(height: 10),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _isEditing = false;
-                    });
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.redAccent,
-                    padding: const EdgeInsets.symmetric(vertical: 15),
-                    textStyle: const TextStyle(fontSize: 16, color: Colors.white),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+            // ====== BOTONES AQUÍ ======
+            _isEditing
+                ? Column(
+                    children: [
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          onPressed: _isLoading
+    ? null
+    : () async {
+        await _updateUserData();
+      },
+                          icon: _isLoading
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : const Icon(Icons.check, color: Colors.white),
+                          label: Text(
+                            _isLoading ? 'Guardando...' : 'Guardar',
+                            style: const TextStyle(color: Colors.white),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.teal,
+                            padding: const EdgeInsets.symmetric(vertical: 15),
+                            textStyle: const TextStyle(fontSize: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: _isLoading
+                              ? null
+                              : () {
+                                  setState(() {
+                                    _isEditing = false;
+                                    _loadUserData(); // Recargar datos originales al cancelar
+                                  });
+                                },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.redAccent,
+                            padding: const EdgeInsets.symmetric(vertical: 15),
+                            textStyle: const TextStyle(fontSize: 16, color: Colors.white),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: const Text('Cancelar', style: TextStyle(color: Colors.white)),
+                        ),
+                      ),
+                    ],
+                  )
+                : SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        setState(() {
+                          _isEditing = true;
+                        });
+                      },
+                      icon: const Icon(Icons.edit, color: Colors.white),
+                      label: const Text('Editar datos', style: TextStyle(color: Colors.white)),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blueAccent,
+                        padding: const EdgeInsets.symmetric(vertical: 15),
+                        textStyle: const TextStyle(fontSize: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
                     ),
                   ),
-                  child: const Text('Cancelar'),
-                ),
-              ),
-            ],
           ],
         ),
       ),
