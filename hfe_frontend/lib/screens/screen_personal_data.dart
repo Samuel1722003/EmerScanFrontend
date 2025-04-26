@@ -20,57 +20,101 @@ class _PersonalDataScreenState extends State<PersonalDataScreen> {
 
   String _selectedGender = "Femenino";
   bool _isEditing = false;
-
+  bool _isLoading = false;
   @override
   void initState() {
     super.initState();
     _loadUserData();
   }
 
-  Future<void> _loadUserData() async {
-    final response = await supabase.from('usuario_persona').select().limit(1).maybeSingle();
-
-    if (response != null) {
-      _firstNameController.text = response['nombre'] ?? '';
-      _lastNameController.text =
-          "${response['apellido_paterno'] ?? ''} ${response['apellido_materno'] ?? ''}".trim();
-      _birthDateController.text = response['fecha_nacimiento'] ?? '';
-      _selectedGender = response['genero'] ?? 'Femenino';
-      //_emergencyNameController.text = response['nombre_contacto_emergencia'] ?? '';
-      //_emergencyPhoneController.text = response['telefono_contacto_emergencia'] ?? '';
-      setState(() {});
-    }
+  String getUserId() {
+    return "01bec088-a454-45b2-8c59-b7b24ea2a111-20250424184650-048029";
   }
+
+  Future<void> _loadUserData() async {
+  // Consulta de datos personales
+  final userResponse = await supabase
+      .from('usuario_persona')
+      .select()
+      .eq('id', getUserId())
+      .maybeSingle();
+
+  // Consulta de contacto de emergencia
+  final contactoResponse = await supabase
+      .from('contacto_emergencia')
+      .select()
+      .eq('usuario_persona_id', getUserId())
+      .maybeSingle();
+
+  if (userResponse != null) {
+    _firstNameController.text = userResponse['nombre'] ?? '';
+    _lastNameController.text =
+        "${userResponse['apellido_paterno'] ?? ''} ${userResponse['apellido_materno'] ?? ''}".trim();
+    _birthDateController.text = userResponse['fecha_nacimiento'] ?? '';
+    _selectedGender = userResponse['genero'] ?? 'Femenino';
+  }
+
+  if (contactoResponse != null) {
+    _emergencyNameController.text = contactoResponse['nombre'] ?? '';
+    _emergencyPhoneController.text = contactoResponse['telefono'] ?? '';
+  }
+
+  setState(() {});
+}
 
   Future<void> _updateUserData() async {
-    String apellidoPaterno = '';
-    String apellidoMaterno = '';
-    final apellidos = _lastNameController.text.trim().split(' ');
-    if (apellidos.isNotEmpty) apellidoPaterno = apellidos[0];
-    if (apellidos.length > 1) apellidoMaterno = apellidos.sublist(1).join(' ');
+  String apellidoPaterno = '';
+  String apellidoMaterno = '';
+  final apellidos = _lastNameController.text.trim().split(' ');
+  if (apellidos.isNotEmpty) apellidoPaterno = apellidos[0];
+  if (apellidos.length > 1) apellidoMaterno = apellidos.sublist(1).join(' ');
 
-    final response = await supabase.from('usuario_persona').update({
-      'nombre': _firstNameController.text.trim(),
-      'apellido_paterno': apellidoPaterno,
-      'apellido_materno': apellidoMaterno,
-      'fecha_nacimiento': _birthDateController.text.trim(),
-      'genero': _selectedGender,
-      //'nombre_contacto_emergencia': _emergencyNameController.text.trim(),
-      //'telefono_contacto_emergencia': _emergencyPhoneController.text.trim(),
-    }).eq('id','01bec088-a454-45b2-8c59-b7b24ea2a111-20250424184650-048029'); // Ajusta aquí el ID o condición según tu tabla
+  final userId = getUserId();
 
-    if (!mounted) return;
+  // Actualiza datos personales
+  final response = await supabase.from('usuario_persona').update({
+    'nombre': _firstNameController.text.trim(),
+    'apellido_paterno': apellidoPaterno,
+    'apellido_materno': apellidoMaterno,
+    'fecha_nacimiento': _birthDateController.text.trim(),
+    'genero': _selectedGender,
+  }).eq('id', userId);
 
-    if (response.error != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error al guardar: ${response.error!.message}')),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Datos actualizados correctamente.')),
-      );
-    }
+  // Verifica si ya hay un contacto de emergencia para este usuario
+  final existingContact = await supabase
+      .from('contacto_emergencia')
+      .select('id')
+      .eq('usuario_persona_id', userId)
+      .maybeSingle();
+
+  if (existingContact != null) {
+    // Si existe, lo actualiza
+    await supabase.from('contacto_emergencia').update({
+      'nombre': _emergencyNameController.text.trim(),
+      'telefono': _emergencyPhoneController.text.trim(),
+    }).eq('id', existingContact['id']);
+  } else {
+    // Si no existe, lo inserta (puedes ajustar la relación según el campo "relacion")
+    await supabase.from('contacto_emergencia').insert({
+      'nombre': _emergencyNameController.text.trim(),
+      'telefono': _emergencyPhoneController.text.trim(),
+      'usuario_persona_id': userId,
+      'relacion': 'Familiar', // Aquí puedes ajustar según tu tipo enum o clave foránea
+    });
   }
+
+  if (!mounted) return;
+
+  if (response.error != null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Error al guardar: ${response.error!.message}')),
+    );
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Datos actualizados correctamente.')),
+    );
+  }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -147,7 +191,8 @@ class _PersonalDataScreenState extends State<PersonalDataScreen> {
               child: ElevatedButton.icon(
                 onPressed: () async {
                   if (_isEditing) {
-                    await _updateUserData();
+                      await _updateUserData();
+                      await _loadUserData();
                   }
                   setState(() {
                     _isEditing = !_isEditing;
