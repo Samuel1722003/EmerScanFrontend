@@ -7,7 +7,8 @@ Future<void> main() async {
 
   await Supabase.initialize(
     url: 'https://dmvgtocktnzamzaqvybr.supabase.co',
-    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRtdmd0b2NrdG56YW16YXF2eWJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQwMzU5ODMsImV4cCI6MjA1OTYxMTk4M30.D2CRrHdpdtprSRBbrCsaP26wDt5z1NS5GsjRkt1UxqE',
+    anonKey:
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRtdmd0b2NrdG56YW16YXF2eWJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQwMzU5ODMsImV4cCI6MjA1OTYxMTk4M30.D2CRrHdpdtprSRBbrCsaP26wDt5z1NS5GsjRkt1UxqE',
   );
 
   final client = Supabase.instance.client;

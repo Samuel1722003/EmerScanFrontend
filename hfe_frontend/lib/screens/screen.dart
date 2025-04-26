@@ -14,3 +14,4 @@ export 'package:hfe_frontend/screens/notifications_screen.dart';
 export 'package:hfe_frontend/screens/security_screen.dart';
 export 'package:hfe_frontend/screens/personalization_screen.dart';
 export 'package:hfe_frontend/screens/support_screen.dart';
+export 'package:hfe_frontend/models/persona.dart';
