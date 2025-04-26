@@ -41,7 +41,7 @@ class _ScreenMedicalDataState extends State<ScreenMedicalData> {
       
       // Intentemos obtener datos directamente con el ID de usuario
       final usuario = await supabase
-          .from('usuarios') // probemos con 'usuarios' en minúsculas 
+          .from('usuario_persona') // probemos con 'usuarios' en minúsculas 
           .select()
           .eq('id', getUserId())
           .maybeSingle();
