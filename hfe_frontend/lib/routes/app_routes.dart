@@ -52,8 +52,14 @@ class AppRoute {
     MenuOptions(
       route: 'MedicalDataScreen',
       title: 'Datos Médicos',
-      screen: const ScreenMedicalData(),
+      screen: const MedicalDataScreen(),
       icon: Icons.local_hospital,
+    ),
+    MenuOptions(
+      route: 'QRCodeScreen',
+      title: 'Codigo QR',
+      screen: const QRCodeScreen(),
+      icon: Icons.qr_code,
     ),
     MenuOptions(
       route: 'SettingsScreen',
@@ -89,7 +95,7 @@ class AppRoute {
 
   static Map<String, Widget Function(BuildContext)> getMenuRoutes() {
     Map<String, Widget Function(BuildContext)> appRoutes = {};
-    appRoutes.addAll({'home': (BuildContext context) => const HomeScreen()});
+    appRoutes.addAll({'home': (BuildContext context) => const LoginScreen()});
     for (final options in menuOptions) {
       appRoutes[options.route] = (BuildContext context) => options.screen;
     }

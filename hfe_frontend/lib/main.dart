@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'HFE Frontend',
+      title: 'EmerScan',
       initialRoute:
           AppRoute.initialRoute, // ← La ruta inicial, la cual es 'home'
       routes: AppRoute.getMenuRoutes(), // ← Aquí van todas las rutas del menú

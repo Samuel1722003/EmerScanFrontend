@@ -1,11 +1,11 @@
 {
-    "name": "hfe_frontend",
-    "short_name": "hfe_frontend",
+    "name": "EmerScan",
+    "short_name": "EmerScan",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Desplegador de información médica.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

@@ -1,17 +1,77 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  String userName = '';
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    try {
+      final supabase = Supabase.instance.client;
+      final user = supabase.auth.currentUser;
+
+      if (user != null) {
+        final userData =
+            await supabase
+                .from('usuario_persona')
+                .select('nombre, apellido_paterno')
+                .eq('id', user.id)
+                .single();
+
+        if (mounted) {
+          setState(() {
+            userName =
+                '${userData['nombre'] ?? ''} ${userData['apellido_paterno'] ?? ''}';
+            isLoading = false;
+          });
+        }
+      } else {
+        final prefs = await SharedPreferences.getInstance();
+        final storedUserName = prefs.getString('user_name');
+        if (mounted) {
+          setState(() {
+            userName = storedUserName ?? 'Usuario';
+            isLoading = false;
+          });
+        }
+      }
+    } catch (e) {
+      print('Error al cargar datos del usuario: $e');
+      if (mounted) {
+        setState(() {
+          userName = 'Usuario';
+          isLoading = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('¡Hola, Cristina!'),
+        title: Text('¡Hola, $userName!'),
         backgroundColor: Colors.lightBlue[50],
       ),
-      drawer: _buildDrawer(context), // Menú lateral
-      body: _buildBody(context),
+      drawer: _buildDrawer(context),
+      body:
+          isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : _buildBody(context),
     );
   }
 
@@ -22,13 +82,13 @@ class HomeScreen extends StatelessWidget {
           // Encabezado con imagen y nombre
           UserAccountsDrawerHeader(
             decoration: BoxDecoration(color: Colors.lightBlue[50]),
-            currentAccountPicture: CircleAvatar(
+            currentAccountPicture: const CircleAvatar(
               backgroundColor: Colors.white,
               child: Icon(Icons.person, size: 50, color: Colors.grey),
             ),
             accountName: Text(
-              'Cristina',
-              style: TextStyle(
+              userName,
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: Colors.black87,
@@ -43,8 +103,8 @@ class HomeScreen extends StatelessWidget {
               children: [
                 // Opción Datos personales
                 ListTile(
-                  leading: Icon(Icons.person, color: Colors.blueGrey),
-                  title: Text(
+                  leading: const Icon(Icons.person, color: Colors.blueGrey),
+                  title: const Text(
                     'Datos personales',
                     style: TextStyle(color: Colors.black87),
                   ),
@@ -55,8 +115,11 @@ class HomeScreen extends StatelessWidget {
 
                 // Opción Datos médicos
                 ListTile(
-                  leading: Icon(Icons.medical_services, color: Colors.blueGrey),
-                  title: Text(
+                  leading: const Icon(
+                    Icons.medical_services,
+                    color: Colors.blueGrey,
+                  ),
+                  title: const Text(
                     'Datos médicos',
                     style: TextStyle(color: Colors.black87),
                   ),
@@ -65,8 +128,23 @@ class HomeScreen extends StatelessWidget {
                   },
                 ),
 
-                Divider(),
+                const Divider(),
 
+                // Opción Código QR
+                ListTile(
+                  leading: const Icon(Icons.qr_code, color: Colors.blueGrey),
+                  title: const Text(
+                    'Codigo QR',
+                    style: TextStyle(color: Colors.black87),
+                  ),
+                  onTap: () {
+                    Navigator.pushNamed(context, 'QRCodeScreen');
+                  },
+                ),
+
+                const Divider(),
+
+                // Opción Ajustes
                 ListTile(
                   leading: Icon(Icons.settings, color: Colors.grey[700]),
                   title: Text(
@@ -77,13 +155,24 @@ class HomeScreen extends StatelessWidget {
                     Navigator.pushNamed(context, 'SettingsScreen');
                   },
                 ),
+
+                // Opción Salir
                 ListTile(
                   leading: Icon(Icons.exit_to_app, color: Colors.grey[700]),
                   title: Text(
                     'Salir',
                     style: TextStyle(color: Colors.grey[700]),
                   ),
-                  onTap: () {
+                  onTap: () async {
+                    // Cerrar sesión
+                    final supabase = Supabase.instance.client;
+                    await supabase.auth.signOut();
+
+                    // Limpiar preferencias
+                    final prefs = await SharedPreferences.getInstance();
+                    await prefs.remove('user_name');
+
+                    if (!mounted) return;
                     Navigator.pushReplacementNamed(context, 'LoginScreen');
                   },
                 ),
@@ -100,16 +189,16 @@ class HomeScreen extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          SizedBox(height: 30),
+          const SizedBox(height: 30),
 
           // Línea horizontal decorativa
           Container(
-            margin: EdgeInsets.symmetric(horizontal: 50),
+            margin: const EdgeInsets.symmetric(horizontal: 50),
             height: 1,
             color: Colors.grey[400],
           ),
 
-          SizedBox(height: 30),
+          const SizedBox(height: 30),
 
           // Botón Datos personales
           _buildHomeButton(
@@ -121,7 +210,7 @@ class HomeScreen extends StatelessWidget {
             },
           ),
 
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
 
           // Botón Datos médicos
           _buildHomeButton(
@@ -156,10 +245,10 @@ class HomeScreen extends StatelessWidget {
             ),
             child: Icon(icon, size: 70, color: Colors.blueGrey),
           ),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           Text(
             label,
-            style: TextStyle(
+            style: const TextStyle(
               fontWeight: FontWeight.bold,
               color: Colors.black87,
             ),

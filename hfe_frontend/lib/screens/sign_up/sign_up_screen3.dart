@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'package:qr_flutter/qr_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:hfe_frontend/screens/widgets.dart';
 import 'package:hfe_frontend/screens/screen.dart';
@@ -52,7 +54,7 @@ class _SignUpScreen3State extends State<SignUpScreen3> {
             const SizedBox(height: 20),
             SignUpTextField(
               label: 'Confirma tu contraseña',
-              controller: _passwordController
+              controller: _passwordController,
             ),
             const SizedBox(height: 40),
             SizedBox(
@@ -72,12 +74,13 @@ class _SignUpScreen3State extends State<SignUpScreen3> {
   }
 
   Future<void> _crearCuenta(Persona signUpData) async {
-    // Validar que los datos coincidan
-    if (_emailController.text != signUpData.correo || 
+    if (_emailController.text != signUpData.correo ||
         _passwordController.text != signUpData.contrasena) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('El correo o contraseña no coinciden con los datos ingresados anteriormente.'),
+          content: Text(
+            'El correo o contraseña no coinciden con los datos ingresados anteriormente.',
+          ),
           backgroundColor: Colors.red,
         ),
       );
@@ -90,18 +93,20 @@ class _SignUpScreen3State extends State<SignUpScreen3> {
       });
 
       final supabase = Supabase.instance.client;
-      
+
       // Verificar si el correo ya existe en la base de datos
       final existingUsers = await supabase
           .from('usuario_persona')
           .select('correo')
           .eq('correo', signUpData.correo);
-      
+
       if (existingUsers.isNotEmpty) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Este correo electrónico ya está registrado. Por favor, utiliza otro.'),
+            content: Text(
+              'Este correo electrónico ya está registrado. Por favor, utiliza otro.',
+            ),
             backgroundColor: Colors.red,
           ),
         );
@@ -116,24 +121,58 @@ class _SignUpScreen3State extends State<SignUpScreen3> {
       final formattedDate =
           '${dateParts[2]}-${dateParts[1].padLeft(2, '0')}-${dateParts[0].padLeft(2, '0')}';
 
-      print('Fecha original: ${signUpData.fechaNacimiento}');
-      print('Fecha formateada: $formattedDate');
+      // Insertar el nuevo usuario y obtener su ID
+      final insertResponse =
+          await supabase
+              .from('usuario_persona')
+              .insert({
+                'correo': signUpData.correo,
+                'contrasena': signUpData.contrasena,
+                'nombre': signUpData.nombre,
+                'apellido_paterno': signUpData.apellidos.split(' ').first,
+                'apellido_materno':
+                    signUpData.apellidos.split(' ').length > 1
+                        ? signUpData.apellidos.split(' ').last
+                        : '',
+                'fecha_nacimiento': formattedDate,
+                'genero': signUpData.genero,
+                'telefono': signUpData.telefono,
+              })
+              .select('id')
+              .single();
 
-      await supabase.from('usuario_persona').insert({
-        'correo': signUpData.correo,
-        'contrasena': signUpData.contrasena,
-        'nombre': signUpData.nombre,
-        'apellido_paterno': signUpData.apellidos.split(' ').first,
-        'apellido_materno':
-            signUpData.apellidos.split(' ').length > 1
-                ? signUpData.apellidos.split(' ').last
-                : '',
-        'fecha_nacimiento': formattedDate,
-        'genero': signUpData.genero,
-        'telefono': signUpData.telefono,
-      });
+      final usuarioId = insertResponse['id'];
 
-      print('Inserción exitosa con usuario_persona');
+      // Generar el código QR con el ID del usuario
+      final qrValidationResult = QrValidator.validate(
+        data: usuarioId.toString(),
+        version: QrVersions.auto,
+        errorCorrectionLevel: QrErrorCorrectLevel.Q,
+      );
+
+      if (qrValidationResult.status == QrValidationStatus.valid) {
+        final qrCode = qrValidationResult.qrCode!;
+        final painter = QrPainter.withQr(
+          qr: qrCode,
+          color: const Color(0xFF000000),
+          emptyColor: const Color(0xFFFFFFFF),
+          gapless: true,
+          embeddedImageStyle: null,
+          embeddedImage: null,
+        );
+
+        final imageData = await painter.toImageData(200);
+        final bytes = imageData!.buffer.asUint8List();
+        final base64Qr = base64Encode(bytes);
+
+        // Actualizar el registro del usuario con el código QR en base64
+        await supabase
+            .from('usuario_persona')
+            .update({'codigo_qr_base64': base64Qr})
+            .eq('id', usuarioId);
+      } else {
+        throw Exception('Error al generar el código QR');
+      }
 
       if (!mounted) return;
       Navigator.pushNamed(context, 'RegisterScreen4');

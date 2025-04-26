@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hfe_frontend/screens/widgets.dart';
 import 'package:hfe_frontend/screens/sign_up/sign_up_screen1.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -39,27 +40,39 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       final supabase = Supabase.instance.client;
-      
-      // Buscar el usuario en la base de datos
-      final result = await supabase
-          .from('usuario_persona')
-          .select()
-          .eq('correo', _emailController.text)
-          .eq('contrasena', _passwordController.text)
-          .limit(1);
 
-      if (result.isEmpty) {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Correo o contraseña incorrectos'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      } else {
+      // Usar el sistema de autenticación de Supabase
+      final AuthResponse response = await supabase.auth.signInWithPassword(
+        email: _emailController.text,
+        password: _passwordController.text,
+      );
+
+      // Verificar si la autenticación fue exitosa
+      if (response.user != null) {
+        // Obtener datos adicionales del usuario
+        final userData =
+            await supabase
+                .from('usuario_persona')
+                .select('nombre, apellido_paterno')
+                .eq('id', response.user!.id)
+                .single();
+
+        // Guardar el nombre del usuario en SharedPreferences
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('user_name', userData['nombre']);
+
         if (!mounted) return;
         // Navegar a la pantalla principal después del inicio de sesión exitoso
         Navigator.of(context).pushReplacementNamed('HomeScreen');
+      }
+    } on AuthException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error de autenticación: ${e.message}'),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     } catch (e) {
       if (mounted) {
@@ -122,16 +135,17 @@ class _LoginScreenState extends State<LoginScreen> {
                       borderRadius: BorderRadius.circular(5), // Bordes rectos
                     ),
                   ),
-                  child: _isLoading
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text(
-                          'Iniciar sesión',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                  child:
+                      _isLoading
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : const Text(
+                            'Iniciar sesión',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
                 ),
               ),
 
