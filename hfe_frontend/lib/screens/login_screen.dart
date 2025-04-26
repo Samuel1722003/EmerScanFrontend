@@ -41,38 +41,31 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       final supabase = Supabase.instance.client;
 
-      // Usar el sistema de autenticación de Supabase
-      final AuthResponse response = await supabase.auth.signInWithPassword(
-        email: _emailController.text,
-        password: _passwordController.text,
-      );
+      // Buscar el usuario en la base de datos
+      final result = await supabase
+          .from('usuario_persona')
+          .select()
+          .eq('correo', _emailController.text)
+          .eq('contrasena', _passwordController.text)
+          .limit(1);
 
-      // Verificar si la autenticación fue exitosa
-      if (response.user != null) {
-        // Obtener datos adicionales del usuario
-        final userData =
-            await supabase
-                .from('usuario_persona')
-                .select('nombre, apellido_paterno')
-                .eq('id', response.user!.id)
-                .single();
-
-        // Guardar el nombre del usuario en SharedPreferences
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('user_name', userData['nombre']);
-
+      if (result.isEmpty) {
         if (!mounted) return;
-        // Navegar a la pantalla principal después del inicio de sesión exitoso
-        Navigator.of(context).pushReplacementNamed('HomeScreen');
-      }
-    } on AuthException catch (e) {
-      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error de autenticación: ${e.message}'),
+          const SnackBar(
+            content: Text('Correo o contraseña incorrectos'),
             backgroundColor: Colors.red,
           ),
         );
+      } else {
+        final userData = result[0];
+        final prefs = await SharedPreferences.getInstance();
+        // Guardamos el nombre y el ID del usuario
+        await prefs.setString('user_name', userData['nombre']);
+        await prefs.setString('user_id', userData['id'].toString());
+
+        if (!mounted) return;
+        Navigator.of(context).pushReplacementNamed('HomeScreen');
       }
     } catch (e) {
       if (mounted) {
@@ -103,11 +96,8 @@ class _LoginScreenState extends State<LoginScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Logo
               Image.asset('assets/images/Logo.png', height: 120),
               const SizedBox(height: 40),
-
-              // Campos de usuario y contraseña
               SignUpInputText(
                 hintText: 'Correo electrónico',
                 prefixIcon: Icons.email,
@@ -122,8 +112,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 controller: _passwordController,
               ),
               const SizedBox(height: 24),
-
-              // Botón Login
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -132,24 +120,21 @@ class _LoginScreenState extends State<LoginScreen> {
                     backgroundColor: Colors.blue,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5), // Bordes rectos
+                      borderRadius: BorderRadius.circular(5),
                     ),
                   ),
-                  child:
-                      _isLoading
-                          ? const CircularProgressIndicator(color: Colors.white)
-                          : const Text(
-                            'Iniciar sesión',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
+                  child: _isLoading
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text(
+                          'Iniciar sesión',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
                           ),
+                        ),
                 ),
               ),
-
-              // Enlace a registro
               TextButton(
                 onPressed: () {
                   Navigator.of(context).push(

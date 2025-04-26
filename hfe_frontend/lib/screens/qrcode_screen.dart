@@ -1,43 +1,50 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:convert';
 
-class QRCodeScreen extends StatelessWidget {
+class QRCodeScreen extends StatefulWidget {
   const QRCodeScreen({super.key});
+
+  @override
+  State<QRCodeScreen> createState() => _QRCodeScreenState();
+}
+
+class _QRCodeScreenState extends State<QRCodeScreen> {
+  String? userId;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserId();
+  }
+
+  Future<void> _loadUserId() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      userId = prefs.getString('user_id');
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final supabase = Supabase.instance.client;
-    final user = supabase.auth.currentUser;
 
-    // Verificar si el usuario está autenticado
-    if (user == null) {
+    if (userId == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Codigo QR')),
-        body: const Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'No has iniciado sesión',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 20),
-              Text('Inicia sesión para acceder a tu código QR'),
-            ],
-          ),
-        ),
+        appBar: AppBar(title: const Text('Código QR')),
+        body: const Center(child: CircularProgressIndicator()),
       );
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Codigo QR')),
+      appBar: AppBar(title: const Text('Código QR')),
       body: FutureBuilder(
         future:
             supabase
                 .from('usuario_persona')
                 .select('codigo_qr_base64')
-                .eq('id', user.id) // Ya verificamos que user no es null
+                .eq('id', userId!)
                 .single(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
