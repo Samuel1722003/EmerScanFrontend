@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:hfe_frontend/screens/widgets.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // <-- ¡Importante!
+import 'package:hfe_frontend/screens/home.dart';
+
+final supabase = Supabase.instance.client;
 
 class PersonalDataScreen extends StatefulWidget {
   const PersonalDataScreen({super.key});
@@ -14,29 +17,39 @@ class _PersonalDataScreenState extends State<PersonalDataScreen> {
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _birthDateController = TextEditingController();
-  final TextEditingController _emergencyNameController = TextEditingController();
-  final TextEditingController _emergencyPhoneController = TextEditingController();
+  final TextEditingController _emergencyNameController =
+      TextEditingController();
+  final TextEditingController _emergencyPhoneController =
+      TextEditingController();
 
-  String _selectedGender = "";
+  String _selectedGender = "Femenino";
   bool _isEditing = false;
-  bool isLoading = true;
-  String? userId;
+  final bool _isLoading = false;
+  String? _userId; // <-- Aquí guardamos el ID del usuario
+
+  // Valores para el Dropdown de relación
+  final List<String> relaciones = [
+    'Padre',
+    'Madre',
+    'Pareja',
+    'Hermano',
+    'Otro',
+  ];
+  String? _selectedRelacion;
 
   @override
   void initState() {
     super.initState();
-    loadUserIdAndFetchData();
+    loadUserIdAndCheckMedicalData(); // <-- Ahora usamos tu función nueva
   }
 
-  Future<void> loadUserIdAndFetchData() async {
+  Future<void> loadUserIdAndCheckMedicalData() async {
     final prefs = await SharedPreferences.getInstance();
     final id = prefs.getString('user_id');
 
     if (id != null) {
-      setState(() {
-        userId = id;
-      });
-      await fetchUserData();
+      setState(() => _userId = id);
+      await _loadUserData();
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -48,79 +61,121 @@ class _PersonalDataScreenState extends State<PersonalDataScreen> {
     }
   }
 
-  Future<void> fetchUserData() async {
+  Future<void> _loadUserData() async {
+    if (_userId == null) return;
+
+    // Consulta de datos personales
+    final userResponse =
+        await supabase
+            .from('usuario_persona')
+            .select()
+            .eq('id', _userId!)
+            .maybeSingle();
+
+    // Consulta de contacto de emergencia
+    final contactoResponse =
+        await supabase
+            .from('contacto_emergencia')
+            .select()
+            .eq('usuario_persona_id', _userId!)
+            .maybeSingle();
+
+    if (userResponse != null) {
+      _firstNameController.text = userResponse['nombre'] ?? '';
+      _lastNameController.text =
+          "${userResponse['apellido_paterno'] ?? ''} ${userResponse['apellido_materno'] ?? ''}"
+              .trim();
+      _birthDateController.text = userResponse['fecha_nacimiento'] ?? '';
+      _selectedGender = userResponse['genero'] ?? 'Femenino';
+    }
+
+    if (contactoResponse != null) {
+      _emergencyNameController.text = contactoResponse['nombre'] ?? '';
+      _emergencyPhoneController.text = contactoResponse['telefono'] ?? '';
+      _selectedRelacion =
+          contactoResponse['relacion'] ??
+          'Otro'; // Asignar relación si ya existe
+    }
+
+    setState(() {});
+  }
+
+  Future<void> _updateUserData() async {
+    if (_userId == null) return;
+
+    String apellidoPaterno = '';
+    String apellidoMaterno = '';
+    final apellidos = _lastNameController.text.trim().split(' ');
+    if (apellidos.isNotEmpty) apellidoPaterno = apellidos[0];
+    if (apellidos.length > 1) apellidoMaterno = apellidos.sublist(1).join(' ');
+
+    final response = await supabase
+        .from('usuario_persona')
+        .update({
+          'nombre': _firstNameController.text.trim(),
+          'apellido_paterno': apellidoPaterno,
+          'apellido_materno': apellidoMaterno,
+          'fecha_nacimiento': _birthDateController.text.trim(),
+          'genero': _selectedGender,
+        })
+        .eq('id', _userId!);
+
+    // Verifica si ya hay un contacto de emergencia para este usuario
+    final existingContact =
+        await supabase
+            .from('contacto_emergencia')
+            .select('id')
+            .eq('usuario_persona_id', _userId!)
+            .maybeSingle();
+
+    if (existingContact != null) {
+      await supabase
+          .from('contacto_emergencia')
+          .update({
+            'nombre': _emergencyNameController.text.trim(),
+            'telefono': _emergencyPhoneController.text.trim(),
+            'relacion': _selectedRelacion, // Actualizamos la relación
+          })
+          .eq('id', existingContact['id']);
+    } else {
+      await supabase.from('contacto_emergencia').insert({
+        'nombre': _emergencyNameController.text.trim(),
+        'telefono': _emergencyPhoneController.text.trim(),
+        'usuario_persona_id': _userId!,
+        'relacion':
+            _selectedRelacion ??
+            'padre', // Por defecto 'padre' si no hay selección
+      });
+    }
+
+    // Primero recargar los datos
+    await _loadUserData();
+
+    if (!mounted) return;
+
+    // Ahora cambiamos solo el estado de edición
     setState(() {
-      isLoading = true;
+      _isEditing = false; // Cambia al botón azul
     });
 
-    try {
-      final supabase = Supabase.instance.client;
-      final prefs = await SharedPreferences.getInstance();
-      final userId = prefs.getString('user_id');
-
-      if (userId == null) {
-        throw Exception('Usuario no autenticado');
-      }
-
-      // Obtener datos personales del usuario
-      final usuario = await supabase
-          .from('usuario_persona')
-          .select()
-          .eq('id', userId)
-          .maybeSingle();
-
-      if (usuario == null) {
-        throw Exception('Usuario no encontrado');
-      }
-
-      // Obtener contacto de emergencia
-      final contactoEmergencia = await supabase
-          .from('contacto_emergencia')
-          .select()
-          .eq('usuario_persona_id', userId)
-          .maybeSingle();
-
-      // Actualizar controladores con datos reales
-      _firstNameController.text = usuario['nombre'] ?? '';
-      _lastNameController.text = '${usuario['apellido_paterno'] ?? ''} ${usuario['apellido_materno'] ?? ''}';
-      
-      // Formatear fecha de nacimiento
-      final fechaNacimiento = usuario['fecha_nacimiento'] != null 
-          ? DateTime.parse(usuario['fecha_nacimiento'])
-          : null;
-      _birthDateController.text = fechaNacimiento != null
-          ? '${fechaNacimiento.day}-${_getMonthName(fechaNacimiento.month)}-${fechaNacimiento.year}'
-          : '';
-
-      _selectedGender = usuario['genero'] ?? '';
-      
-      _emergencyNameController.text = contactoEmergencia?['nombre'] ?? '';
-      _emergencyPhoneController.text = contactoEmergencia?['telefono'] ?? '';
-
-      setState(() {
-        isLoading = false;
-      });
-    } catch (e) {
-      print('Error al cargar datos personales: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error al cargar datos: $e'),
-          ),
-        );
-      }
-      setState(() {
-        isLoading = false;
-      });
+    // Mostrar mensaje
+    if (response.error != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al guardar: ${response.error!.message}')),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Datos actualizados correctamente.')),
+      );
     }
   }
 
-  String _getMonthName(int month) {
-    const months = [
-      'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
-    ];
-    return months[month - 1];
+  // Función para cancelar la edición y restaurar los valores originales
+  void _cancelEdit() {
+    setState(() {
+      _isEditing = false;
+      _loadUserData(); // Restaurar los datos originales
+    });
   }
 
   @override
@@ -131,123 +186,200 @@ class _PersonalDataScreenState extends State<PersonalDataScreen> {
         backgroundColor: Colors.lightBlue[50],
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black),
+        automaticallyImplyLeading: true, // Esto controla el botón de retroceso
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            // Regresar a HomeScreen cuando se presione el ícono de regreso
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => HomeScreen()),
+            );
+          },
+        ),
       ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const SizedBox(height: 10),
-                  const Text(
-                    'Datos personales',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const SizedBox(height: 10),
+            const Text(
+              'Datos personales',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 10),
+            Divider(color: Colors.grey[400]),
+            const SizedBox(height: 20),
+            CustomTextField(
+              label: 'Nombres',
+              controller: _firstNameController,
+              isEditable: _isEditing,
+            ),
+            const SizedBox(height: 15),
+            CustomTextField(
+              label: 'Apellidos',
+              controller: _lastNameController,
+              isEditable: _isEditing,
+            ),
+            const SizedBox(height: 15),
+            CustomTextField(
+              label: 'Fecha de nacimiento',
+              controller: _birthDateController,
+              isEditable: _isEditing,
+            ),
+            const SizedBox(height: 15),
+            _isEditing
+                ? GenderDropdownWidget(
+                  selectedGender: _selectedGender,
+                  onChanged: (newValue) {
+                    if (_isEditing) {
+                      setState(() {
+                        _selectedGender = newValue!;
+                      });
+                    }
+                  },
+                  isEditable: _isEditing,
+                )
+                : CustomTextField(
+                  label: 'Género',
+                  controller: TextEditingController(text: _selectedGender),
+                  isEditable: false,
+                ),
+            const SizedBox(height: 15),
+            CustomTextField(
+              label: 'Nombre contacto de emergencia',
+              controller: _emergencyNameController,
+              isEditable: _isEditing,
+            ),
+            const SizedBox(height: 15),
+            CustomTextField(
+              label: 'Número contacto de emergencia',
+              controller: _emergencyPhoneController,
+              isEditable: _isEditing,
+            ),
+            const SizedBox(height: 15),
+            _isEditing
+                ? DropdownButtonFormField<String>(
+                  value: _selectedRelacion,
+                  items:
+                      relaciones.map((relacion) {
+                        return DropdownMenuItem(
+                          value: relacion,
+                          child: Text(relacion),
+                        );
+                      }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedRelacion = value;
+                    });
+                  },
+                  decoration: InputDecoration(
+                    labelText: 'Relación con el contacto',
+                    border: OutlineInputBorder(),
                   ),
-                  const SizedBox(height: 10),
-                  Divider(color: Colors.grey[400]),
-                  const SizedBox(height: 20),
-                  CustomTextField(
-                    label: 'Nombres',
-                    controller: _firstNameController,
-                    isEditable: _isEditing,
-                  ),
-                  const SizedBox(height: 15),
-                  CustomTextField(
-                    label: 'Apellidos',
-                    controller: _lastNameController,
-                    isEditable: _isEditing,
-                  ),
-                  const SizedBox(height: 15),
-                  CustomTextField(
-                    label: 'Fecha de nacimiento',
-                    controller: _birthDateController,
-                    isEditable: _isEditing,
-                  ),
-                  const SizedBox(height: 15),
-                  _isEditing
-                      ? GenderDropdownWidget(
-                          selectedGender: _selectedGender,
-                          onChanged: (newValue) {
-                            if (_isEditing) {
-                              setState(() {
-                                _selectedGender = newValue!;
-                              });
-                            }
-                          },
-                          isEditable: _isEditing,
-                        )
-                      : CustomTextField(
-                          label: 'Género',
-                          controller: TextEditingController(text: _selectedGender),
-                          isEditable: false,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Selecciona la relación';
+                    }
+                    return null;
+                  },
+                )
+                : CustomTextField(
+                  label: 'Relación',
+                  controller: TextEditingController(text: _selectedRelacion),
+                  isEditable: false,
+                ),
+            const SizedBox(height: 30),
+            // ====== BOTONES AQUÍ ======
+            _isEditing
+                ? Column(
+                  children: [
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed:
+                            _isLoading
+                                ? null
+                                : () async {
+                                  await _updateUserData();
+                                },
+                        icon:
+                            _isLoading
+                                ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                                : const Icon(Icons.check, color: Colors.white),
+                        label: Text(
+                          _isLoading ? 'Guardando...' : 'Guardar',
+                          style: const TextStyle(color: Colors.white),
                         ),
-                  const SizedBox(height: 15),
-                  CustomTextField(
-                    label: 'Nombre contacto de emergencia',
-                    controller: _emergencyNameController,
-                    isEditable: _isEditing,
-                  ),
-                  const SizedBox(height: 15),
-                  CustomTextField(
-                    label: 'Número contacto de emergencia',
-                    controller: _emergencyPhoneController,
-                    isEditable: _isEditing,
-                  ),
-                  const SizedBox(height: 30),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        setState(() {
-                          _isEditing = !_isEditing;
-                        });
-                      },
-                      icon: Icon(
-                        _isEditing ? Icons.check : Icons.edit,
-                        color: Colors.white,
-                      ),
-                      label: Text(
-                        _isEditing ? 'Guardar' : 'Editar datos',
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: _isEditing ? Colors.teal : Colors.blueAccent,
-                        padding: const EdgeInsets.symmetric(vertical: 15),
-                        textStyle: const TextStyle(fontSize: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.teal,
+                          padding: const EdgeInsets.symmetric(vertical: 15),
+                          textStyle: const TextStyle(fontSize: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  if (_isEditing) ...[
                     const SizedBox(height: 10),
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
                         onPressed: () {
-                          setState(() {
-                            _isEditing = false;
-                            // Recargar datos originales
-                            fetchUserData();
-                          });
+                          _cancelEdit();
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.redAccent,
                           padding: const EdgeInsets.symmetric(vertical: 15),
-                          textStyle: const TextStyle(fontSize: 16, color: Colors.white),
+                          textStyle: const TextStyle(fontSize: 16),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(15),
                           ),
                         ),
-                        child: const Text('Cancelar', selectionColor: Colors.white),
+                        child: const Text(
+                          'Cancelar',
+                          style: TextStyle(color: Colors.white),
+                        ),
                       ),
                     ),
                   ],
-                ],
-              ),
-            ),
+                )
+                : SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed:
+                        _isLoading
+                            ? null
+                            : () {
+                              setState(() {
+                                _isEditing = true;
+                              });
+                            },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.teal,
+                      padding: const EdgeInsets.symmetric(vertical: 15),
+                      textStyle: const TextStyle(fontSize: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                    ),
+                    child: const Text(
+                      'Editar datos personales',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ),
+          ],
+        ),
+      ),
     );
   }
 }

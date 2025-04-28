@@ -101,162 +101,53 @@ BEFORE INSERT ON Usuario_Persona
 FOR EACH ROW
 EXECUTE FUNCTION generate_uuid();
 
--- Insert para Usuario_Persona 1
-INSERT INTO Usuario_Persona (correo, contrasena, codigo_qr_base64, nombre, apellido_paterno, apellido_materno, fecha_nacimiento, genero, telefono)
-VALUES (
-    'juan.perez@email.com', 
-    'hashed_password_123', 
-    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUg...',
-    'Juan',
-    'Pérez',
-    'González',
-    '1990-05-15',
-    'Masculino',
-    '6671234567'
+-- Tabla de tokens para acceso a información médica de emergencia
+CREATE TABLE IF NOT EXISTS medical_tokens (
+  id SERIAL PRIMARY KEY,
+  user_id TEXT REFERENCES usuario_persona(id),
+  token TEXT UNIQUE NOT NULL,
+  expira_en TIMESTAMP WITH TIME ZONE NOT NULL,
+  creado_en TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  es_activo BOOLEAN DEFAULT TRUE
 );
 
--- Contacto de emergencia
-INSERT INTO Contacto_emergencia (nombre, telefono, relacion, usuario_persona_id)
-VALUES (
-    'Ana Pérez', 
-    '6677654321', 
-    'Madre', 
-    (SELECT id FROM Usuario_Persona WHERE correo = 'juan.perez@email.com')
+CREATE POLICY "Usuarios autenticados pueden upsert" 
+ON medical_tokens
+FOR INSERT, UPDATE
+USING (auth.uid() = user_id);
+
+ALTER TABLE medical_tokens
+ADD CONSTRAINT unique_user_id UNIQUE (user_id);
+
+-- Índice para búsquedas rápidas por token
+CREATE INDEX IF NOT EXISTS idx_medical_tokens_token ON medical_tokens(token);
+
+-- Índice para búsquedas por usuario
+CREATE INDEX IF NOT EXISTS idx_medical_tokens_user_id ON medical_tokens(user_id);
+
+-- Tabla para contactos de emergencia (si no existe)
+CREATE TABLE IF NOT EXISTS contactos_emergencia (
+  id SERIAL PRIMARY KEY,
+  usuario_id UUID REFERENCES usuario_persona(id),
+  nombre TEXT NOT NULL,
+  telefono TEXT NOT NULL,
+  relacion TEXT,
+  es_primario BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- Historial clínico
-INSERT INTO Historial_clinico (peso, estatura, tipo_sangre, usuario_persona_id)
-VALUES (
-    72.50, 
-    1.75, 
-    'O+', 
-    (SELECT id FROM Usuario_Persona WHERE correo = 'juan.perez@email.com')
-);
+-- Política RLS para permitir acceso público a la información médica con token
+ALTER TABLE medical_tokens ENABLE ROW LEVEL SECURITY;
 
--- Antecedentes
-INSERT INTO Antecedentes (cirugias_anteriores, hospitalizaciones_anteriores, antecedentes_familiares, historial_id)
-VALUES (
-    'Apendicectomía en 2015',
-    'Hospitalizado por neumonía en 2018',
-    'Padre con hipertensión',
-    (SELECT id FROM Historial_clinico WHERE usuario_persona_id = (SELECT id FROM Usuario_Persona WHERE correo = 'juan.perez@email.com'))
-);
+CREATE POLICY "Permitir acceso público a tokens" ON medical_tokens
+  FOR SELECT 
+  USING (true);
 
--- Alergias
-INSERT INTO Alergias (nombre_alergia, historial_id)
-VALUES (
-    'Penicilina',
-    (SELECT id FROM Historial_clinico WHERE usuario_persona_id = (SELECT id FROM Usuario_Persona WHERE correo = 'juan.perez@email.com'))
-);
+-- Política para permitir que el usuario cree/actualice sus propios tokens
+CREATE POLICY "Usuarios pueden crear sus propios tokens" ON medical_tokens
+  FOR INSERT
+  WITH CHECK (auth.uid()::text = user_id::text);
 
--- Enfermedades
-INSERT INTO Enfermedades (nombre_enfermedad, fecha_de_diagnostico, estado, historial_id)
-VALUES (
-    'Diabetes Tipo 2',
-    '2021-04-10',
-    'Tratamiento',
-    (SELECT id FROM Historial_clinico WHERE usuario_persona_id = (SELECT id FROM Usuario_Persona WHERE correo = 'juan.perez@email.com'))
-);
-
--- Tratamiento
-INSERT INTO Tratamiento (nombre_medicamento, dosis, frecuencia, duracion, fecha_inicio)
-VALUES (
-    'Metformina',
-    '500mg',
-    '2 veces al día',
-    180,
-    '2024-01-01'
-);
-
--- Relación Tratamiento-Enfermedad
-INSERT INTO Tratamiento_Enfermedad (tratamiento_id, enfermedad_id)
-VALUES (
-    (SELECT id FROM Tratamiento WHERE nombre_medicamento = 'Metformina'),
-    (SELECT id FROM Enfermedades WHERE nombre_enfermedad = 'Diabetes Tipo 2')
-);
-
--- Bitácora de acceso
-INSERT INTO Bitacora_Acceso (usuario_persona_id)
-VALUES (
-    (SELECT id FROM Usuario_Persona WHERE correo = 'juan.perez@email.com')
-);
-
--- Insert para Usuario_Persona 2
-INSERT INTO Usuario_Persona (correo, contrasena, codigo_qr_base64, nombre, apellido_paterno, apellido_materno, fecha_nacimiento, genero, telefono)
-VALUES (
-    'cristina.soliz@email.com', 
-    'hashed_password_456', 
-    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUg...',
-    'Cristina',
-    'Soliz',
-    'Ramírez',
-    '1985-11-22',
-    'Femenino',
-    '6679988776'
-);
-
--- Contacto de emergencia (id = 2)
-INSERT INTO Contacto_emergencia (nombre, telefono, relacion, usuario_persona_id)
-VALUES (
-    'Carlos Soliz', 
-    '6671122334', 
-    'Hermano', 
-    (SELECT id FROM Usuario_Persona WHERE correo = 'cristina.soliz@email.com')
-);
-
--- Historial clínico (id = 2)
-INSERT INTO Historial_clinico (peso, estatura, tipo_sangre, usuario_persona_id)
-VALUES (
-    60.80, 
-    1.63, 
-    'A+', 
-    (SELECT id FROM Usuario_Persona WHERE correo = 'cristina.soliz@email.com')
-);
-
--- Antecedentes (id = 2)
-INSERT INTO Antecedentes (cirugias_anteriores, hospitalizaciones_anteriores, antecedentes_familiares, historial_id)
-VALUES (
-    'Cesárea en 2010',
-    'Ninguna',
-    'Madre con diabetes',
-    (SELECT id FROM Historial_clinico WHERE usuario_persona_id = (SELECT id FROM Usuario_Persona WHERE correo = 'cristina.soliz@email.com'))
-);
-
--- Alergias (id = 2)
-INSERT INTO Alergias (nombre_alergia, historial_id)
-VALUES (
-    'Ibuprofeno',
-    (SELECT id FROM Historial_clinico WHERE usuario_persona_id = (SELECT id FROM Usuario_Persona WHERE correo = 'cristina.soliz@email.com'))
-);
-
--- Enfermedades (id = 2)
-INSERT INTO Enfermedades (nombre_enfermedad, fecha_de_diagnostico, estado, historial_id)
-VALUES (
-    'Hipotiroidismo',
-    '2020-03-15',
-    'Tratamiento',
-    (SELECT id FROM Historial_clinico WHERE usuario_persona_id = (SELECT id FROM Usuario_Persona WHERE correo = 'cristina.soliz@email.com'))
-);
-
--- Tratamiento (id = 2)
-INSERT INTO Tratamiento (nombre_medicamento, dosis, frecuencia, duracion, fecha_inicio)
-VALUES (
-    'Levotiroxina',
-    '100mcg',
-    '1 vez al día',
-    365,
-    '2024-01-10'
-);
-
--- Relación Tratamiento-Enfermedad (id = 2)
-INSERT INTO Tratamiento_Enfermedad (tratamiento_id, enfermedad_id)
-VALUES (
-    (SELECT id FROM Tratamiento WHERE nombre_medicamento = 'Levotiroxina'),
-    (SELECT id FROM Enfermedades WHERE nombre_enfermedad = 'Hipotiroidismo')
-);
-
--- Bitácora de acceso (id = 2)
-INSERT INTO Bitacora_Acceso (usuario_persona_id)
-VALUES (
-    (SELECT id FROM Usuario_Persona WHERE correo = 'cristina.soliz@email.com')
-);
+CREATE POLICY "Usuarios pueden actualizar sus propios tokens" ON medical_tokens
+  FOR UPDATE
+  USING (auth.uid()::text = user_id::text);
