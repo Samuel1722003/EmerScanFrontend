@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:qr_flutter/qr_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:hfe_frontend/screens/widgets.dart';
 import 'package:hfe_frontend/screens/screen.dart';
@@ -61,10 +60,9 @@ class _SignUpScreen3State extends State<SignUpScreen3> {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: _isLoading ? null : () => _crearCuenta(signUpData),
-                child:
-                    _isLoading
-                        ? const CircularProgressIndicator()
-                        : const Text('Crear cuenta'),
+                child: _isLoading
+                    ? const CircularProgressIndicator()
+                    : const Text('Crear cuenta'),
               ),
             ),
           ],
@@ -121,62 +119,38 @@ class _SignUpScreen3State extends State<SignUpScreen3> {
       final formattedDate =
           '${dateParts[2]}-${dateParts[1].padLeft(2, '0')}-${dateParts[0].padLeft(2, '0')}';
 
-      // Insertar el nuevo usuario (el UUID se generará automáticamente)
-      final insertResponse =
-          await supabase
-              .from('usuario_persona')
-              .insert({
-                'correo': signUpData.correo,
-                'contrasena': signUpData.contrasena,
-                'nombre': signUpData.nombre,
-                'apellido_paterno': signUpData.apellidos.split(' ').first,
-                'apellido_materno':
-                    signUpData.apellidos.split(' ').length > 1
-                        ? signUpData.apellidos.split(' ').last
-                        : '',
-                'fecha_nacimiento': formattedDate,
-                'genero': signUpData.genero,
-                'telefono': signUpData.telefono,
-              })
-              .select('id')
-              .single();
+      // Insertar el nuevo usuario
+      final insertResponse = await supabase
+          .from('usuario_persona')
+          .insert({
+            'correo': signUpData.correo,
+            'contrasena': signUpData.contrasena,
+            'nombre': signUpData.nombre,
+            'apellido_paterno': signUpData.apellidos.split(' ').first,
+            'apellido_materno': signUpData.apellidos.split(' ').length > 1
+                ? signUpData.apellidos.split(' ').last
+                : '',
+            'fecha_nacimiento': formattedDate,
+            'genero': signUpData.genero,
+            'telefono': signUpData.telefono,
+          })
+          .select('id')
+          .single();
 
       final usuarioId = insertResponse['id'];
 
-      // Generar QR con el UUID de la base de datos
+      // Generar datos del QR (no imagen)
       final qrData = jsonEncode({
         'usuarioId': usuarioId,
         'tipo': 'identificacion_medica',
         'fechaGeneracion': DateTime.now().toIso8601String(),
       });
 
-      final qrValidationResult = QrValidator.validate(
-        data: qrData,
-        version: QrVersions.auto,
-        errorCorrectionLevel: QrErrorCorrectLevel.Q,
-      );
-
-      if (qrValidationResult.status == QrValidationStatus.valid) {
-        final qrCode = qrValidationResult.qrCode!;
-        final painter = QrPainter.withQr(
-          qr: qrCode,
-          color: const Color(0xFF000000),
-          emptyColor: const Color(0xFFFFFFFF),
-          gapless: true,
-        );
-
-        final imageData = await painter.toImageData(200);
-        final bytes = imageData!.buffer.asUint8List();
-        final base64Qr = base64Encode(bytes);
-
-        // Actualizar el usuario con el QR generado
-        await supabase
-            .from('usuario_persona')
-            .update({'codigo_qr_base64': base64Qr})
-            .eq('id', usuarioId);
-      } else {
-        throw Exception('Error al generar el código QR');
-      }
+      // Guardar los datos del QR en la base de datos
+      await supabase
+          .from('usuario_persona')
+          .update({'codigo_qr': qrData})
+          .eq('id', usuarioId);
 
       if (!mounted) return;
       Navigator.pushNamed(context, 'RegisterScreen4');
