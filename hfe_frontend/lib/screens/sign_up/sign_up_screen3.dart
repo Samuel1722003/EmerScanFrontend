@@ -60,9 +60,10 @@ class _SignUpScreen3State extends State<SignUpScreen3> {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: _isLoading ? null : () => _crearCuenta(signUpData),
-                child: _isLoading
-                    ? const CircularProgressIndicator()
-                    : const Text('Crear cuenta'),
+                child:
+                    _isLoading
+                        ? const CircularProgressIndicator()
+                        : const Text('Crear cuenta'),
               ),
             ),
           ],
@@ -120,27 +121,33 @@ class _SignUpScreen3State extends State<SignUpScreen3> {
           '${dateParts[2]}-${dateParts[1].padLeft(2, '0')}-${dateParts[0].padLeft(2, '0')}';
 
       // Insertar el nuevo usuario
-      final insertResponse = await supabase
-          .from('usuario_persona')
-          .insert({
-            'correo': signUpData.correo,
-            'contrasena': signUpData.contrasena,
-            'nombre': signUpData.nombre,
-            'apellido_paterno': signUpData.apellidos.split(' ').first,
-            'apellido_materno': signUpData.apellidos.split(' ').length > 1
-                ? signUpData.apellidos.split(' ').last
-                : '',
-            'fecha_nacimiento': formattedDate,
-            'genero': signUpData.genero,
-            'telefono': signUpData.telefono,
-          })
-          .select('id')
-          .single();
+      final insertResponse =
+          await supabase
+              .from('usuario_persona')
+              .insert({
+                'correo': signUpData.correo,
+                'contrasena': signUpData.contrasena,
+                'nombre': signUpData.nombre,
+                'apellido_paterno': signUpData.apellidos.split(' ').first,
+                'apellido_materno':
+                    signUpData.apellidos.split(' ').length > 1
+                        ? signUpData.apellidos.split(' ').last
+                        : '',
+                'fecha_nacimiento': formattedDate,
+                'genero': signUpData.genero,
+                'telefono': signUpData.telefono,
+              })
+              .select('id')
+              .single();
 
       final usuarioId = insertResponse['id'];
 
-      // Generar datos del QR (no imagen)
+      // Generar URL para el QR (usa tu dominio de Firebase Hosting real)
+      final qrUrl = 'https://emerscandespliegue-1.web.app/info?id=$usuarioId';
+
+      // Generar datos del QR incluyendo la URL
       final qrData = jsonEncode({
+        'url': qrUrl,
         'usuarioId': usuarioId,
         'tipo': 'identificacion_medica',
         'fechaGeneracion': DateTime.now().toIso8601String(),

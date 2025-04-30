@@ -52,7 +52,6 @@ class _MedicalViewPageState extends State<MedicalViewPage> {
 
       final userId = parts[0];
       final timestamp = int.parse(parts[1]);
-      final providedHash = parts[2];
 
       // Verificar si el token ha expirado
       final expiryTime = DateTime.fromMillisecondsSinceEpoch(timestamp);
