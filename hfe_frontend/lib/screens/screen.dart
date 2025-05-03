@@ -16,3 +16,4 @@ export 'package:hfe_frontend/screens/personalization_screen.dart';
 export 'package:hfe_frontend/screens/support_screen.dart';
 export 'package:hfe_frontend/models/persona.dart';
 export 'package:hfe_frontend/screens/qrcode_screen.dart';
+export 'package:hfe_frontend/themes/app_theme.dart';

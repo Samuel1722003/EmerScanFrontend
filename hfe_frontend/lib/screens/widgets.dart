@@ -19,3 +19,6 @@ export 'package:hfe_frontend/widgets/toggle_switch.dart';
 export 'package:hfe_frontend/widgets/notifications_dropdown.dart';
 export 'package:hfe_frontend/widgets/session_list.dart';
 export 'package:hfe_frontend/widgets/support_button.dart';
+export 'package:hfe_frontend/widgets/bmi_indicator.dart';
+export 'package:hfe_frontend/widgets/form_input.dart';
+export 'package:hfe_frontend/widgets/medical_profile_header.dart';
