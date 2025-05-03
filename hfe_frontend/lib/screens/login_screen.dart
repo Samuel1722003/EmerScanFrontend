@@ -3,6 +3,7 @@ import 'package:hfe_frontend/screens/widgets.dart';
 import 'package:hfe_frontend/screens/sign_up/sign_up_screen1.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:bcrypt/bcrypt.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -46,27 +47,41 @@ class _LoginScreenState extends State<LoginScreen> {
           .from('usuario_persona')
           .select()
           .eq('correo', _emailController.text)
-          .eq('contrasena', _passwordController.text)
           .limit(1);
 
       if (result.isEmpty) {
-        if (!mounted) return;
+        // Usuario no encontrado
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Correo o contraseña incorrectos'),
             backgroundColor: Colors.red,
           ),
         );
-      } else {
-        final userData = result[0];
-        final prefs = await SharedPreferences.getInstance();
-        // Guardamos el nombre y el ID del usuario
-        await prefs.setString('user_name', userData['nombre']);
-        await prefs.setString('user_id', userData['id'].toString());
-
-        if (!mounted) return;
-        Navigator.of(context).pushReplacementNamed('HomeScreen');
+        return;
       }
+
+      final user = result[0];
+      final passwordHash = user['contrasena'];
+
+      if (!BCrypt.checkpw(_passwordController.text, passwordHash)) {
+        // Contraseña incorrecta
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Correo o contraseña incorrectos'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
+      final userData = result[0];
+      final prefs = await SharedPreferences.getInstance();
+      // Guardamos el nombre y el ID del usuario
+      await prefs.setString('user_name', userData['nombre']);
+      await prefs.setString('user_id', userData['id'].toString());
+
+      if (!mounted) return;
+      Navigator.of(context).pushReplacementNamed('HomeScreen');
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

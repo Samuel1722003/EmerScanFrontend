@@ -15,15 +15,13 @@ class _MedicalDataScreenState extends State<MedicalDataScreen> {
   bool hasMedicalData = false;
   bool isRegistering = false;
   String? userId;
-  
-  // Datos médicos
+
   Map<String, dynamic> historialClinico0 = {};
   List<dynamic> alergias0 = [];
   List<dynamic> enfermedades0 = [];
   Map<String, dynamic> antecedentes0 = {};
   List<dynamic> tratamientos0 = [];
-  
-  // Controladores para formulario
+
   final _pesoController = TextEditingController();
   final _estaturaController = TextEditingController();
   final _tipoSangreController = TextEditingController();
@@ -48,7 +46,9 @@ class _MedicalDataScreenState extends State<MedicalDataScreen> {
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Error: No se encontró el ID de usuario')),
+          const SnackBar(
+            content: Text('No se pudo obtener tu información de usuario. Por favor intenta iniciar sesión nuevamente.'),
+          ),
         );
       }
     }
@@ -64,7 +64,7 @@ class _MedicalDataScreenState extends State<MedicalDataScreen> {
           .maybeSingle();
 
       setState(() => hasMedicalData = historial != null);
-      
+
       if (hasMedicalData) {
         await fetchMedicalData();
       } else {
@@ -74,7 +74,7 @@ class _MedicalDataScreenState extends State<MedicalDataScreen> {
       setState(() => isLoading = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al verificar datos: $e')),
+          SnackBar(content: Text('Ocurrió un problema al revisar tus datos médicos. Intenta más tarde.')),
         );
       }
     }
@@ -82,7 +82,7 @@ class _MedicalDataScreenState extends State<MedicalDataScreen> {
 
   Future<void> fetchMedicalData() async {
     setState(() => isLoading = true);
-    
+
     try {
       final supabase = Supabase.instance.client;
 
@@ -125,81 +125,116 @@ class _MedicalDataScreenState extends State<MedicalDataScreen> {
       setState(() => isLoading = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al cargar datos: $e')),
+          SnackBar(content: Text('No se pudieron cargar tus datos médicos. Revisa tu conexión e intenta nuevamente.')),
         );
       }
     }
   }
 
   Future<void> registerMedicalData() async {
+    if (_pesoController.text.isEmpty ||
+        _estaturaController.text.isEmpty ||
+        _tipoSangreController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Por favor completa los campos obligatorios: peso, estatura y tipo de sangre.'),
+        ),
+      );
+      return;
+    }
+
+    double? peso;
+    double? estatura;
+
+    try {
+      peso = double.parse(_pesoController.text);
+      estatura = double.parse(_estaturaController.text);
+    } catch (_) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Peso y estatura deben ser números válidos. Ej: 70.5'),
+        ),
+      );
+      return;
+    }
+
     setState(() => isLoading = true);
-    
+
     try {
       final supabase = Supabase.instance.client;
 
-      // 1. Crear historial clínico
       final historialResponse = await supabase
           .from('historial_clinico')
           .insert({
             'usuario_persona_id': userId!,
-            'peso': double.parse(_pesoController.text),
-            'estatura': double.parse(_estaturaController.text),
-            'tipo_sangre': _tipoSangreController.text,
+            'peso': peso,
+            'estatura': estatura,
+            'tipo_sangre': _tipoSangreController.text.trim().toUpperCase(),
           })
           .select('id')
           .single();
 
       final historialId = historialResponse['id'];
 
-      // 2. Registrar alergias
       if (_alergiasController.text.isNotEmpty) {
-        final alergiasList = _alergiasController.text.split(',').map((a) => a.trim()).toList();
+        final alergiasList = _alergiasController.text
+            .split(',')
+            .map((a) => a.trim())
+            .where((a) => a.isNotEmpty)
+            .toList();
+
         await supabase.from('alergias').insert(
-          alergiasList.map((alergia) => {
-            'historial_id': historialId,
-            'nombre_alergia': alergia,
-          }).toList()
+          alergiasList
+              .map((alergia) => {
+                    'historial_id': historialId,
+                    'nombre_alergia': alergia,
+                  })
+              .toList(),
         );
       }
 
-      // 3. Registrar enfermedades
       if (_enfermedadesController.text.isNotEmpty) {
-        final enfermedadesList = _enfermedadesController.text.split(',').map((e) => e.trim()).toList();
+        final enfermedadesList = _enfermedadesController.text
+            .split(',')
+            .map((e) => e.trim())
+            .where((e) => e.isNotEmpty)
+            .toList();
+
         await supabase.from('enfermedades').insert(
-          enfermedadesList.map((enfermedad) => {
-            'historial_id': historialId,
-            'nombre_enfermedad': enfermedad,
-            'fecha_de_diagnostico': DateTime.now().toIso8601String(),
-            'estado': 'Tratamiento',
-          }).toList()
+          enfermedadesList
+              .map((enfermedad) => {
+                    'historial_id': historialId,
+                    'nombre_enfermedad': enfermedad,
+                    'fecha_de_diagnostico': DateTime.now().toIso8601String(),
+                    'estado': 'Tratamiento',
+                  })
+              .toList(),
         );
       }
 
-      // 4. Registrar antecedentes
       await supabase.from('antecedentes').insert({
         'historial_id': historialId,
-        'cirugias_anteriores': _cirugiasController.text,
-        'hospitalizaciones_anteriores': _hospitalizacionesController.text,
+        'cirugias_anteriores': _cirugiasController.text.trim(),
+        'hospitalizaciones_anteriores': _hospitalizacionesController.text.trim(),
       });
 
       setState(() {
         hasMedicalData = true;
         isRegistering = false;
       });
-      
-      // Recargar datos
+
       await fetchMedicalData();
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Datos médicos registrados exitosamente')),
+          const SnackBar(content: Text('Datos médicos guardados correctamente.')),
         );
       }
     } catch (e) {
       setState(() => isLoading = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al registrar datos: $e')),
+          const SnackBar(content: Text('Ocurrió un error al guardar los datos. Verifica la información e intenta de nuevo.')),
         );
       }
     }
@@ -285,16 +320,29 @@ class _MedicalDataScreenState extends State<MedicalDataScreen> {
           ElevatedButton(
             onPressed: isLoading ? null : registerMedicalData,
             style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 15),
-              backgroundColor: Colors.teal,
+              backgroundColor: Colors.blueAccent,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              elevation: 3,
             ),
-            child: isLoading
-                ? const CircularProgressIndicator(color: Colors.white)
-                : const Text('Guardar Datos Médicos', style: TextStyle(fontSize: 16)),
+            child:
+                isLoading
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : const Text(
+                      'Guardar Datos Médicos',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
           ),
           const SizedBox(height: 15),
           TextButton(
-            onPressed: isLoading ? null : () => setState(() => isRegistering = false),
+            onPressed:
+                isLoading ? null : () => setState(() => isRegistering = false),
             child: const Text('Cancelar'),
           ),
         ],
@@ -310,16 +358,16 @@ class _MedicalDataScreenState extends State<MedicalDataScreen> {
   String formatEnfermedades() {
     if (enfermedades0.isEmpty) return "Ninguna registrada";
     return enfermedades0
-        .map((e) => "${e['nombre_enfermedad']} (${e['estado'] ?? 'Sin estado'})")
+        .map(
+          (e) => "${e['nombre_enfermedad']} (${e['estado'] ?? 'Sin estado'})",
+        )
         .join(', ');
   }
 
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     if (!hasMedicalData && !isRegistering) {
@@ -392,7 +440,8 @@ class _MedicalDataScreenState extends State<MedicalDataScreen> {
                   children: [
                     MedicalCard(
                       title: "Grupo Sanguíneo",
-                      content: historialClinico0['tipo_sangre'] ?? "No especificado",
+                      content:
+                          historialClinico0['tipo_sangre'] ?? "No especificado",
                       icon: Icons.bloodtype,
                       color: Colors.redAccent,
                     ),
@@ -410,19 +459,23 @@ class _MedicalDataScreenState extends State<MedicalDataScreen> {
                     ),
                     MedicalCard(
                       title: "Medidas",
-                      content: "Peso: ${historialClinico0['peso'] ?? 'N/A'} kg\nEstatura: ${historialClinico0['estatura'] ?? 'N/A'} m",
+                      content:
+                          "Peso: ${historialClinico0['peso'] ?? 'N/A'} kg\nEstatura: ${historialClinico0['estatura'] ?? 'N/A'} m",
                       icon: Icons.monitor_weight,
                       color: Colors.pinkAccent,
                     ),
                     MedicalCard(
                       title: "Cirugías",
-                      content: antecedentes0['cirugias_anteriores'] ?? "Ninguna",
+                      content:
+                          antecedentes0['cirugias_anteriores'] ?? "Ninguna",
                       icon: Icons.local_hospital,
                       color: Colors.indigo,
                     ),
                     MedicalCard(
                       title: "Hospitalizaciones",
-                      content: antecedentes0['hospitalizaciones_anteriores'] ?? "Ninguna",
+                      content:
+                          antecedentes0['hospitalizaciones_anteriores'] ??
+                          "Ninguna",
                       icon: Icons.local_hospital_outlined,
                       color: Colors.teal,
                     ),

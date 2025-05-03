@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hfe_frontend/screens/widgets.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:shared_preferences/shared_preferences.dart'; // <-- ¡Importante!
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hfe_frontend/screens/home.dart';
 
 final supabase = Supabase.instance.client;
@@ -24,7 +24,7 @@ class _PersonalDataScreenState extends State<PersonalDataScreen> {
 
   String _selectedGender = "Femenino";
   bool _isEditing = false;
-  final bool _isLoading = false;
+  bool _isLoading = false;
   String? _userId; // <-- Aquí guardamos el ID del usuario
 
   // Valores para el Dropdown de relación
@@ -40,7 +40,7 @@ class _PersonalDataScreenState extends State<PersonalDataScreen> {
   @override
   void initState() {
     super.initState();
-    loadUserIdAndCheckMedicalData(); // <-- Ahora usamos tu función nueva
+    loadUserIdAndCheckMedicalData();
   }
 
   Future<void> loadUserIdAndCheckMedicalData() async {
@@ -58,6 +58,20 @@ class _PersonalDataScreenState extends State<PersonalDataScreen> {
           ),
         );
       }
+    }
+  }
+
+  bool _validatePhoneNumber(String phone) {
+    final cleaned = phone.replaceAll(RegExp(r'\D'), ''); // solo dígitos
+  return cleaned.length >= 8 && cleaned.length <= 15;
+  }
+
+  bool _validateDate(String date) {
+    try {
+      DateTime.parse(date);
+      return true;
+    } catch (_) {
+      return false;
     }
   }
 
@@ -92,9 +106,7 @@ class _PersonalDataScreenState extends State<PersonalDataScreen> {
     if (contactoResponse != null) {
       _emergencyNameController.text = contactoResponse['nombre'] ?? '';
       _emergencyPhoneController.text = contactoResponse['telefono'] ?? '';
-      _selectedRelacion =
-          contactoResponse['relacion'] ??
-          'Otro'; // Asignar relación si ya existe
+      _selectedRelacion = contactoResponse['relacion'] ?? 'Otro';
     }
 
     setState(() {});
@@ -102,6 +114,24 @@ class _PersonalDataScreenState extends State<PersonalDataScreen> {
 
   Future<void> _updateUserData() async {
     if (_userId == null) return;
+
+    if (!_validateDate(_birthDateController.text.trim())) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Fecha de nacimiento no válida (formato: AAAA-MM-DD).'),
+        ),
+      );
+      return;
+    }
+
+    if (!_validatePhoneNumber(_emergencyPhoneController.text.trim())) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Número de teléfono no válido.')),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
 
     String apellidoPaterno = '';
     String apellidoMaterno = '';
@@ -134,7 +164,7 @@ class _PersonalDataScreenState extends State<PersonalDataScreen> {
           .update({
             'nombre': _emergencyNameController.text.trim(),
             'telefono': _emergencyPhoneController.text.trim(),
-            'relacion': _selectedRelacion, // Actualizamos la relación
+            'relacion': _selectedRelacion,
           })
           .eq('id', existingContact['id']);
     } else {
@@ -144,7 +174,7 @@ class _PersonalDataScreenState extends State<PersonalDataScreen> {
         'usuario_persona_id': _userId!,
         'relacion':
             _selectedRelacion ??
-            'padre', // Por defecto 'padre' si no hay selección
+            'Padre', // Por defecto 'padre' si no hay selección
       });
     }
 
@@ -153,9 +183,10 @@ class _PersonalDataScreenState extends State<PersonalDataScreen> {
 
     if (!mounted) return;
 
-    // Ahora cambiamos solo el estado de edición
+    // Ahora cambiamos el estado de edición y carga
     setState(() {
-      _isEditing = false; // Cambia al botón azul
+      _isEditing = false;
+      _isLoading = false;
     });
 
     // Mostrar mensaje
@@ -291,7 +322,6 @@ class _PersonalDataScreenState extends State<PersonalDataScreen> {
                   isEditable: false,
                 ),
             const SizedBox(height: 30),
-            // ====== BOTONES AQUÍ ======
             _isEditing
                 ? Column(
                   children: [

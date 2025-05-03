@@ -91,6 +91,12 @@ class AppRoute {
       screen: const SupportScreen(),
       icon: Icons.settings,
     ),
+    MenuOptions(
+      route: 'ErrorScreen',
+      title: 'Error',
+      screen: const ErrorScreen(),
+      icon: Icons.error,
+    ),
   ];
 
   static Map<String, Widget Function(BuildContext)> getMenuRoutes() {

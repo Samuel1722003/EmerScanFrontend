@@ -4,6 +4,7 @@ import 'package:hfe_frontend/screens/widgets.dart';
 import 'package:hfe_frontend/screens/screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:hfe_frontend/models/persona.dart';
+import 'package:bcrypt/bcrypt.dart';
 
 class SignUpScreen3 extends StatefulWidget {
   const SignUpScreen3({super.key});
@@ -120,13 +121,19 @@ class _SignUpScreen3State extends State<SignUpScreen3> {
       final formattedDate =
           '${dateParts[2]}-${dateParts[1].padLeft(2, '0')}-${dateParts[0].padLeft(2, '0')}';
 
+      //Encriptar contraseña
+      final hashedPassword = BCrypt.hashpw(
+        signUpData.contrasena,
+        BCrypt.gensalt(),
+      );
+
       // Insertar el nuevo usuario
       final insertResponse =
           await supabase
               .from('usuario_persona')
               .insert({
                 'correo': signUpData.correo,
-                'contrasena': signUpData.contrasena,
+                'contrasena': hashedPassword,
                 'nombre': signUpData.nombre,
                 'apellido_paterno': signUpData.apellidos.split(' ').first,
                 'apellido_materno':
@@ -143,7 +150,7 @@ class _SignUpScreen3State extends State<SignUpScreen3> {
       final usuarioId = insertResponse['id'];
 
       // Generar URL para el QR (usa tu dominio de Firebase Hosting real)
-      final qrUrl = 'https://emerscandespliegue-1.web.app/info?id=$usuarioId';
+      final qrUrl = 'https://emerscan-3ba8e.web.app/info?id=$usuarioId';
 
       // Generar datos del QR incluyendo la URL
       final qrData = jsonEncode({
