@@ -109,6 +109,15 @@ class AppRoute {
   }
 
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
+    final uri = Uri.parse(settings.name ?? '');
+
+    if (uri.pathSegments.length == 2 &&
+        uri.pathSegments.first == 'MedicalDataScreen') {
+      final userId = uri.pathSegments[1];
+      return MaterialPageRoute(
+        builder: (context) => MedicalDataScreen(userId: userId),
+      );
+    }
     return MaterialPageRoute(builder: (context) => const ErrorScreen());
   }
 }

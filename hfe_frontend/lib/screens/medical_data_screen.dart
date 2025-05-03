@@ -4,7 +4,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MedicalDataScreen extends StatefulWidget {
-  const MedicalDataScreen({super.key});
+  final String? userId;
+  const MedicalDataScreen({super.key, this.userId});
 
   @override
   State<MedicalDataScreen> createState() => _MedicalDataScreenState();
@@ -37,8 +38,13 @@ class _MedicalDataScreenState extends State<MedicalDataScreen> {
   }
 
   Future<void> loadUserIdAndCheckMedicalData() async {
-    final prefs = await SharedPreferences.getInstance();
-    final id = prefs.getString('user_id');
+    String? id;
+    if (widget.userId != null) {
+      id = widget.userId;
+    } else {
+      dynamic prefs = await SharedPreferences.getInstance();
+      id = prefs.getString('user_id');
+    }
 
     if (id != null) {
       setState(() => userId = id);
@@ -47,7 +53,9 @@ class _MedicalDataScreenState extends State<MedicalDataScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('No se pudo obtener tu información de usuario. Por favor intenta iniciar sesión nuevamente.'),
+            content: Text(
+              'No se pudo obtener tu información de usuario. Por favor intenta iniciar sesión nuevamente.',
+            ),
           ),
         );
       }
@@ -57,11 +65,12 @@ class _MedicalDataScreenState extends State<MedicalDataScreen> {
   Future<void> checkMedicalData() async {
     try {
       final supabase = Supabase.instance.client;
-      final historial = await supabase
-          .from('historial_clinico')
-          .select()
-          .eq('usuario_persona_id', userId!)
-          .maybeSingle();
+      final historial =
+          await supabase
+              .from('historial_clinico')
+              .select()
+              .eq('usuario_persona_id', userId!)
+              .maybeSingle();
 
       setState(() => hasMedicalData = historial != null);
 
@@ -74,7 +83,11 @@ class _MedicalDataScreenState extends State<MedicalDataScreen> {
       setState(() => isLoading = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Ocurrió un problema al revisar tus datos médicos. Intenta más tarde.')),
+          SnackBar(
+            content: Text(
+              'Ocurrió un problema al revisar tus datos médicos. Intenta más tarde.',
+            ),
+          ),
         );
       }
     }
@@ -86,11 +99,12 @@ class _MedicalDataScreenState extends State<MedicalDataScreen> {
     try {
       final supabase = Supabase.instance.client;
 
-      final historialClinico = await supabase
-          .from('historial_clinico')
-          .select()
-          .eq('usuario_persona_id', userId!)
-          .maybeSingle();
+      final historialClinico =
+          await supabase
+              .from('historial_clinico')
+              .select()
+              .eq('usuario_persona_id', userId!)
+              .maybeSingle();
 
       if (historialClinico == null) {
         throw Exception('Historial clínico no encontrado');
@@ -108,11 +122,12 @@ class _MedicalDataScreenState extends State<MedicalDataScreen> {
           .select()
           .eq('historial_id', historialId);
 
-      final antecedentes = await supabase
-          .from('antecedentes')
-          .select()
-          .eq('historial_id', historialId)
-          .maybeSingle();
+      final antecedentes =
+          await supabase
+              .from('antecedentes')
+              .select()
+              .eq('historial_id', historialId)
+              .maybeSingle();
 
       setState(() {
         historialClinico0 = historialClinico;
@@ -125,7 +140,11 @@ class _MedicalDataScreenState extends State<MedicalDataScreen> {
       setState(() => isLoading = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('No se pudieron cargar tus datos médicos. Revisa tu conexión e intenta nuevamente.')),
+          SnackBar(
+            content: Text(
+              'No se pudieron cargar tus datos médicos. Revisa tu conexión e intenta nuevamente.',
+            ),
+          ),
         );
       }
     }
@@ -137,7 +156,9 @@ class _MedicalDataScreenState extends State<MedicalDataScreen> {
         _tipoSangreController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Por favor completa los campos obligatorios: peso, estatura y tipo de sangre.'),
+          content: Text(
+            'Por favor completa los campos obligatorios: peso, estatura y tipo de sangre.',
+          ),
         ),
       );
       return;
@@ -163,59 +184,71 @@ class _MedicalDataScreenState extends State<MedicalDataScreen> {
     try {
       final supabase = Supabase.instance.client;
 
-      final historialResponse = await supabase
-          .from('historial_clinico')
-          .insert({
-            'usuario_persona_id': userId!,
-            'peso': peso,
-            'estatura': estatura,
-            'tipo_sangre': _tipoSangreController.text.trim().toUpperCase(),
-          })
-          .select('id')
-          .single();
+      final historialResponse =
+          await supabase
+              .from('historial_clinico')
+              .insert({
+                'usuario_persona_id': userId!,
+                'peso': peso,
+                'estatura': estatura,
+                'tipo_sangre': _tipoSangreController.text.trim().toUpperCase(),
+              })
+              .select('id')
+              .single();
 
       final historialId = historialResponse['id'];
 
       if (_alergiasController.text.isNotEmpty) {
-        final alergiasList = _alergiasController.text
-            .split(',')
-            .map((a) => a.trim())
-            .where((a) => a.isNotEmpty)
-            .toList();
+        final alergiasList =
+            _alergiasController.text
+                .split(',')
+                .map((a) => a.trim())
+                .where((a) => a.isNotEmpty)
+                .toList();
 
-        await supabase.from('alergias').insert(
-          alergiasList
-              .map((alergia) => {
-                    'historial_id': historialId,
-                    'nombre_alergia': alergia,
-                  })
-              .toList(),
-        );
+        await supabase
+            .from('alergias')
+            .insert(
+              alergiasList
+                  .map(
+                    (alergia) => {
+                      'historial_id': historialId,
+                      'nombre_alergia': alergia,
+                    },
+                  )
+                  .toList(),
+            );
       }
 
       if (_enfermedadesController.text.isNotEmpty) {
-        final enfermedadesList = _enfermedadesController.text
-            .split(',')
-            .map((e) => e.trim())
-            .where((e) => e.isNotEmpty)
-            .toList();
+        final enfermedadesList =
+            _enfermedadesController.text
+                .split(',')
+                .map((e) => e.trim())
+                .where((e) => e.isNotEmpty)
+                .toList();
 
-        await supabase.from('enfermedades').insert(
-          enfermedadesList
-              .map((enfermedad) => {
-                    'historial_id': historialId,
-                    'nombre_enfermedad': enfermedad,
-                    'fecha_de_diagnostico': DateTime.now().toIso8601String(),
-                    'estado': 'Tratamiento',
-                  })
-              .toList(),
-        );
+        await supabase
+            .from('enfermedades')
+            .insert(
+              enfermedadesList
+                  .map(
+                    (enfermedad) => {
+                      'historial_id': historialId,
+                      'nombre_enfermedad': enfermedad,
+                      'fecha_de_diagnostico': DateTime.now().toIso8601String(),
+                      'estado': 'Tratamiento',
+                    },
+                  )
+                  .toList(),
+            );
       }
 
       await supabase.from('antecedentes').insert({
         'historial_id': historialId,
         'cirugias_anteriores': _cirugiasController.text.trim(),
-        'hospitalizaciones_anteriores': _hospitalizacionesController.text.trim(),
+        'hospitalizaciones_anteriores':
+            _hospitalizacionesController.text.trim(),
       });
 
       setState(() {
@@ -227,14 +260,20 @@ class _MedicalDataScreenState extends State<MedicalDataScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Datos médicos guardados correctamente.')),
+          const SnackBar(
+            content: Text('Datos médicos guardados correctamente.'),
+          ),
         );
       }
     } catch (e) {
       setState(() => isLoading = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Ocurrió un error al guardar los datos. Verifica la información e intenta de nuevo.')),
+          const SnackBar(
+            content: Text(
+              'Ocurrió un error al guardar los datos. Verifica la información e intenta de nuevo.',
+            ),
+          ),
         );
       }
     }

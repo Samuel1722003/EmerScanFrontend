@@ -150,7 +150,7 @@ class _SignUpScreen3State extends State<SignUpScreen3> {
       final usuarioId = insertResponse['id'];
 
       // Generar URL para el QR (usa tu dominio de Firebase Hosting real)
-      final qrUrl = 'https://emerscan-3ba8e.web.app/info?id=$usuarioId';
+      final qrUrl = 'https://emerscan-3b3b9.web.app/#MedicalDataScreen/$usuarioId';
 
       // Generar datos del QR incluyendo la URL
       final qrData = jsonEncode({
