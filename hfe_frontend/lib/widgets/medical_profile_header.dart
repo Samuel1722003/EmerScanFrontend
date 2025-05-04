@@ -10,14 +10,14 @@ class MedicalProfileHeader extends StatelessWidget {
   final String? contactoRelacion;
 
   const MedicalProfileHeader({
-    Key? key,
+    super.key,
     this.nombre,
     this.peso,
     this.estatura,
     this.contactoNombre,
     this.contactoTelefono,
     this.contactoRelacion,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

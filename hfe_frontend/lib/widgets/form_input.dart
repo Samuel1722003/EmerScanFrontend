@@ -12,7 +12,7 @@ class FormInput extends StatefulWidget {
   final String? helperText;
 
   const FormInput({
-    Key? key,
+    super.key,
     required this.controller,
     required this.label,
     required this.hint,
@@ -21,7 +21,7 @@ class FormInput extends StatefulWidget {
     this.validator,
     this.maxLines = 1,
     this.helperText,
-  }) : super(key: key);
+  });
 
   @override
   State<FormInput> createState() => _FormInputState();

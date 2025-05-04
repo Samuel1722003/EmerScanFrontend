@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class BMIIndicator extends StatelessWidget {
   final double bmi;
   
-  const BMIIndicator({Key? key, required this.bmi}) : super(key: key);
+  const BMIIndicator({super.key, required this.bmi});
   
   Color _getBmiColor() {
     if (bmi < 18.5) return Colors.blue;

@@ -22,3 +22,5 @@ export 'package:hfe_frontend/widgets/support_button.dart';
 export 'package:hfe_frontend/widgets/bmi_indicator.dart';
 export 'package:hfe_frontend/widgets/form_input.dart';
 export 'package:hfe_frontend/widgets/medical_profile_header.dart';
+export 'package:hfe_frontend/widgets/input_field.dart';
+export 'package:hfe_frontend/widgets/build_gender_dropdown.dart';

@@ -9,13 +9,13 @@ class MedicalCard extends StatefulWidget {
   final VoidCallback? onTap;
 
   const MedicalCard({
-    Key? key,
+    super.key,
     required this.title,
     required this.content,
     required this.icon,
     required this.color,
     this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   State<MedicalCard> createState() => _MedicalCardState();
