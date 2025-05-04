@@ -132,49 +132,76 @@ class _SignUpScreen1State extends State<SignUpScreen1> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Registro (1/4)')),
-      body: Padding(
+      backgroundColor: AppTheme.background,
+      appBar: AppBar(
+        title: const Text(
+          'Registro (1/4)',
+          style: TextStyle(fontWeight: FontWeight.w600),
+        ),
+        backgroundColor: AppTheme.primary,
+        elevation: 0,
+        centerTitle: true,
+      ),
+      body: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
         padding: const EdgeInsets.all(20.0),
         child: Form(
           key: _formKey,
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const CustomProgressBar(progress: 0.25),
-              const SizedBox(height: 20),
+              const SizedBox(height: 24),
               const Text(
                 'Datos personales',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                style: AppTheme.heading,
+                textAlign: TextAlign.left,
               ),
-              const SizedBox(height: 30),
-              SignUpTextField(
-                label: 'Nombres',
+              const SizedBox(height: 8),
+              const Text(
+                'Por favor completa la siguiente información para crear tu cuenta',
+                style: AppTheme.cardContent,
+              ),
+              const SizedBox(height: 32),
+              _buildTextField(
+                label: 'Nombres', 
+                hint: 'Ingresa tu nombre', 
                 controller: _nameController,
+                icon: Icons.person_outline,
                 validator: _validateName,
               ),
               const SizedBox(height: 20),
-              SignUpTextField(
-                label: 'Apellidos',
+              _buildTextField(
+                label: 'Apellidos', 
+                hint: 'Ingresa tus apellidos', 
                 controller: _lastNameController,
+                icon: Icons.person_outline,
                 validator: _validateLastName,
               ),
               const SizedBox(height: 20),
-              SignUpTextField(
-                label: 'Fecha de nacimiento',
+              _buildTextField(
+                label: 'Fecha de nacimiento', 
+                hint: 'DD/MM/AAAA',
                 controller: _birthDateController,
+                icon: Icons.calendar_today,
                 isDate: true,
                 validator: _validateBirthDate,
               ),
               const SizedBox(height: 20),
-              SignUpDropdown(
+              _buildDropdown(
                 label: 'Género',
-                items: const ['Masculino', 'Femenino'],
+                hint: 'Selecciona tu género',
+                icon: Icons.wc,
+                items: const ['Masculino', 'Femenino', 'Prefiero no decir'],
                 onChanged: (value) => setState(() => _genderValue = value ?? ''),
                 validator: _validateGender,
               ),
               const SizedBox(height: 20),
-              SignUpTextField(
-                label: 'Teléfono',
+              _buildTextField(
+                label: 'Teléfono', 
+                hint: 'Ej: 5512345678', 
                 controller: _phoneController,
+                icon: Icons.phone,
                 validator: _validatePhone,
               ),
               const SizedBox(height: 40),
@@ -182,15 +209,130 @@ class _SignUpScreen1State extends State<SignUpScreen1> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: _isSubmitting ? null : _submitForm,
+                  style: AppTheme.primaryButtonStyle,
                   child: _isSubmitting
-                      ? const CircularProgressIndicator()
-                      : const Text('Continuar'),
+                      ? SizedBox(
+                          height: 24,
+                          width: 24,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2.5,
+                          ),
+                        )
+                      : const Text(
+                          'Continuar',
+                          style: TextStyle(
+                            fontSize: 16, 
+                            fontWeight: FontWeight.bold
+                          ),
+                        ),
                 ),
               ),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildTextField({
+    required String label,
+    required String hint,
+    required TextEditingController controller,
+    required IconData icon,
+    bool isDate = false,
+    String? Function(String?)? validator,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: AppTheme.textPrimary,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          decoration: AppTheme.inputDecoration(label, hint, icon: icon),
+          style: const TextStyle(fontSize: 16),
+          validator: validator,
+          readOnly: isDate,
+          onTap: isDate ? () async {
+            FocusScope.of(context).requestFocus(FocusNode());
+            final DateTime? picked = await showDatePicker(
+              context: context,
+              initialDate: DateTime.now().subtract(const Duration(days: 365 * 18)),
+              firstDate: DateTime(1900),
+              lastDate: DateTime.now(),
+              builder: (context, child) {
+                return Theme(
+                  data: Theme.of(context).copyWith(
+                    colorScheme: ColorScheme.light(
+                      primary: AppTheme.primary,
+                      onPrimary: Colors.white,
+                      onSurface: AppTheme.textPrimary,
+                    ),
+                  ),
+                  child: child!,
+                );
+              },
+            );
+            if (picked != null) {
+              controller.text = "${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}";
+            }
+          } : null,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDropdown({
+    required String label,
+    required String hint,
+    required IconData icon,
+    required List<String> items,
+    required void Function(String?) onChanged,
+    required String? Function(String?)? validator,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: AppTheme.textPrimary,
+          ),
+        ),
+        const SizedBox(height: 8),
+        DropdownButtonFormField<String>(
+          decoration: AppTheme.inputDecoration(label, hint, icon: icon),
+          items: items.map((String value) {
+            return DropdownMenuItem<String>(
+              value: value,
+              child: Text(value),
+            );
+          }).toList(),
+          onChanged: onChanged,
+          validator: validator,
+          style: const TextStyle(
+            fontSize: 16,
+            color: AppTheme.textPrimary,
+          ),
+          icon: const Icon(Icons.arrow_drop_down, color: AppTheme.primary),
+          isExpanded: true,
+          hint: Text(
+            hint,
+            style: TextStyle(color: Colors.grey.shade500),
+          ),
+          dropdownColor: Colors.white,
+        ),
+      ],
     );
   }
 }
