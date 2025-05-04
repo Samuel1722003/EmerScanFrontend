@@ -5,6 +5,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:flutter/services.dart';
 import 'package:hfe_frontend/screens/screen.dart';
+import 'package:share_plus/share_plus.dart';
+import 'dart:ui' as ui;
+import 'package:flutter/rendering.dart';
 
 class QRCodeScreen extends StatefulWidget {
   const QRCodeScreen({super.key});
@@ -18,6 +21,7 @@ class _QRCodeScreenState extends State<QRCodeScreen> {
   bool isLoading = true;
   String qrUrlData = ''; // URL del JSON
   String? userName;
+  final GlobalKey qrKey = GlobalKey(); // Clave global para capturar el QR
 
   @override
   void initState() {
@@ -101,13 +105,72 @@ class _QRCodeScreenState extends State<QRCodeScreen> {
   }
 
   Future<void> _shareQRCode() async {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('Función de compartir no implementada'),
-        backgroundColor: AppTheme.secondary,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
+    try {
+      if (qrUrlData.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('No hay código QR para compartir'),
+            backgroundColor: Colors.red[700],
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        return;
+      }
+
+      // Mostrar un indicador de carga
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return Center(
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primary),
+            ),
+          );
+        },
+      );
+
+      // Capturar la imagen del QR
+      final RenderRepaintBoundary boundary = qrKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+      final ui.Image image = await boundary.toImage(pixelRatio: 3.0);
+      final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      
+      if (byteData == null) {
+        Navigator.of(context).pop(); // Cerrar el diálogo de carga
+        throw Exception('No se pudo capturar la imagen del QR');
+      }
+      
+      final Uint8List pngBytes = byteData.buffer.asUint8List();
+      
+      // Cerrar el diálogo de carga
+      Navigator.of(context).pop();
+      
+      // Compartir directamente los bytes como XFile sin guardar en disco
+      final result = await Share.shareXFiles(
+        [XFile.fromData(pngBytes, mimeType: 'image/png', name: 'qr_code.png')],
+        text: 'Información médica de ${userName ?? "Usuario"}',
+        subject: 'Código QR médico',
+      );
+      
+      if (result.status == ShareResultStatus.success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('¡Código QR compartido exitosamente!'),
+            backgroundColor: AppTheme.secondary,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      print('Error al compartir el QR: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error al compartir el QR: ${e.toString()}'),
+          backgroundColor: Colors.red[700],
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 
   Future<void> _copyBase64ToClipboard() async {
@@ -241,19 +304,22 @@ class _QRCodeScreenState extends State<QRCodeScreen> {
                                       ),
                                     ],
                                   ),
-                                  child: QrImageView(
-                                    data: qrUrlData,
-                                    version: QrVersions.auto,
-                                    size: 250.0,
-                                    backgroundColor: Colors.white,
-                                    errorStateBuilder: (context, error) {
-                                      return Center(
-                                        child: Text(
-                                          'Error al generar QR',
-                                          style: TextStyle(color: Colors.red[700]),
-                                        ),
-                                      );
-                                    },
+                                  child: RepaintBoundary(
+                                    key: qrKey,
+                                    child: QrImageView(
+                                      data: qrUrlData,
+                                      version: QrVersions.auto,
+                                      size: 250.0,
+                                      backgroundColor: Colors.white,
+                                      errorStateBuilder: (context, error) {
+                                        return Center(
+                                          child: Text(
+                                            'Error al generar QR',
+                                            style: TextStyle(color: Colors.red[700]),
+                                          ),
+                                        );
+                                      },
+                                    ),
                                   ),
                                 ),
                           const SizedBox(height: 20),

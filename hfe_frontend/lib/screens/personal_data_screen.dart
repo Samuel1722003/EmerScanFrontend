@@ -175,8 +175,9 @@ class _PersonalDataScreenState extends State<PersonalDataScreen> {
       String apellidoMaterno = '';
       final apellidos = _lastNameController.text.trim().split(' ');
       if (apellidos.isNotEmpty) apellidoPaterno = apellidos[0];
-      if (apellidos.length > 1)
+      if (apellidos.length > 1) {
         apellidoMaterno = apellidos.sublist(1).join(' ');
+      }
 
       // Actualizar datos personales
       await supabase
@@ -408,8 +409,9 @@ class _PersonalDataScreenState extends State<PersonalDataScreen> {
                       ? GenderDropdown(
                         selectedGender: _selectedGender,
                         onChanged: (value) {
-                          if (value != null)
+                          if (value != null) {
                             setState(() => _selectedGender = value);
+                          }
                         },
                       )
                       : CustomInputField(

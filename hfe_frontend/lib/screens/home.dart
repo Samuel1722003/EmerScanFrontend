@@ -51,6 +51,7 @@ class _HomeScreenState extends State<HomeScreen> {
         }
       }
     } catch (e) {
+      // ignore: avoid_print
       print('Error al cargar datos del usuario: $e');
       if (mounted) {
         setState(() {
