@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:hfe_frontend/screens/screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -63,52 +64,102 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppTheme.background,
       appBar: AppBar(
-        title: Text('¡Hola, $userName!'),
-        backgroundColor: Colors.lightBlue[50],
+        title: Text(
+          '¡Hola, $userName!',
+          style: const TextStyle(fontWeight: FontWeight.w600),
+        ),
+        backgroundColor: AppTheme.primary,
+        elevation: 0,
+        centerTitle: true,
       ),
       drawer: _buildDrawer(context),
       body:
           isLoading
-              ? const Center(child: CircularProgressIndicator())
+              ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: 50,
+                      height: 50,
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          AppTheme.primary,
+                        ),
+                        strokeWidth: 3,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      "Cargando información...",
+                      style: TextStyle(
+                        color: AppTheme.textSecondary,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
+              )
               : _buildBody(context),
     );
   }
 
   Widget _buildDrawer(BuildContext context) {
     return Drawer(
+      backgroundColor: Colors.white,
       child: Column(
         children: [
           // Encabezado con imagen y nombre
-          UserAccountsDrawerHeader(
-            decoration: BoxDecoration(color: Colors.lightBlue[50]),
-            currentAccountPicture: const CircleAvatar(
-              backgroundColor: Colors.white,
-              child: Icon(Icons.person, size: 50, color: Colors.grey),
+          Container(
+            padding: const EdgeInsets.only(top: 50, bottom: 20),
+            width: double.infinity,
+            color: AppTheme.primary,
+            child: Column(
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 2),
+                  ),
+                  child: const CircleAvatar(
+                    radius: 40,
+                    backgroundColor: Colors.white,
+                    child: Icon(
+                      Icons.person,
+                      size: 50,
+                      color: AppTheme.primary,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  userName,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
             ),
-            accountName: Text(
-              userName,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
-              ),
-            ),
-            accountEmail: null,
           ),
 
           // Opciones de menú
           Expanded(
-            child: Column(
+            child: ListView(
+              padding: EdgeInsets.zero,
               children: [
                 // Opción Datos personales
                 ListTile(
-                  leading: const Icon(Icons.person, color: Colors.blueGrey),
+                  leading: const Icon(Icons.person, color: AppTheme.primary),
                   title: const Text(
                     'Datos personales',
-                    style: TextStyle(color: Colors.black87),
+                    style: TextStyle(fontWeight: FontWeight.w500),
                   ),
                   onTap: () {
+                    Navigator.pop(context);
                     Navigator.pushNamed(context, 'PersonalDataScreen');
                   },
                 ),
@@ -117,13 +168,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 ListTile(
                   leading: const Icon(
                     Icons.medical_services,
-                    color: Colors.blueGrey,
+                    color: AppTheme.secondary,
                   ),
                   title: const Text(
                     'Datos médicos',
-                    style: TextStyle(color: Colors.black87),
+                    style: TextStyle(fontWeight: FontWeight.w500),
                   ),
                   onTap: () {
+                    Navigator.pop(context);
                     Navigator.pushNamed(context, 'MedicalDataScreen');
                   },
                 ),
@@ -132,12 +184,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 // Opción Código QR
                 ListTile(
-                  leading: const Icon(Icons.qr_code, color: Colors.blueGrey),
+                  leading: const Icon(Icons.qr_code, color: AppTheme.accent),
                   title: const Text(
-                    'Codigo QR',
-                    style: TextStyle(color: Colors.black87),
+                    'Código QR',
+                    style: TextStyle(fontWeight: FontWeight.w500),
                   ),
                   onTap: () {
+                    Navigator.pop(context);
                     Navigator.pushNamed(context, 'QRCodeScreen');
                   },
                 ),
@@ -146,22 +199,32 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 // Opción Ajustes
                 ListTile(
-                  leading: Icon(Icons.settings, color: Colors.grey[700]),
+                  leading: Icon(Icons.settings, color: AppTheme.textSecondary),
                   title: Text(
                     'Ajustes',
-                    style: TextStyle(color: Colors.grey[700]),
+                    style: TextStyle(
+                      fontWeight: FontWeight.w500,
+                      color: AppTheme.textSecondary,
+                    ),
                   ),
                   onTap: () {
+                    Navigator.pop(context);
                     Navigator.pushNamed(context, 'SettingsScreen');
                   },
                 ),
 
                 // Opción Salir
                 ListTile(
-                  leading: Icon(Icons.exit_to_app, color: Colors.grey[700]),
-                  title: Text(
+                  leading: const Icon(
+                    Icons.exit_to_app,
+                    color: Colors.redAccent,
+                  ),
+                  title: const Text(
                     'Salir',
-                    style: TextStyle(color: Colors.grey[700]),
+                    style: TextStyle(
+                      fontWeight: FontWeight.w500,
+                      color: Colors.redAccent,
+                    ),
                   ),
                   onTap: () async {
                     // Cerrar sesión
@@ -179,81 +242,123 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
           ),
+
+          // Versión al final del drawer
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            child: Text(
+              'v1.0.0',
+              style: TextStyle(color: AppTheme.textSecondary, fontSize: 12),
+            ),
+          ),
         ],
       ),
     );
   }
 
   Widget _buildBody(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          const SizedBox(height: 30),
-
-          // Línea horizontal decorativa
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 50),
-            height: 1,
-            color: Colors.grey[400],
+    return CustomScrollView(
+      physics: const BouncingScrollPhysics(),
+      slivers: [
+        // Encabezado con saludo
+        SliverToBoxAdapter(
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("Bienvenido/a de nuevo", style: AppTheme.heading),
+                Text(
+                  "¿Qué te gustaría hacer hoy?",
+                  style: TextStyle(color: AppTheme.textSecondary, fontSize: 16),
+                ),
+              ],
+            ),
           ),
+        ),
 
-          const SizedBox(height: 30),
-
-          // Botón Datos personales
-          _buildHomeButton(
-            context,
-            icon: Icons.person,
-            label: 'Datos personales',
-            onTap: () {
-              Navigator.pushNamed(context, 'PersonalDataScreen');
-            },
+        // Tarjetas de acceso rápido (sin la tarjeta de Citas)
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          sliver: SliverGrid.count(
+            crossAxisCount: 2,
+            crossAxisSpacing: 16.0,
+            mainAxisSpacing: 16.0,
+            childAspectRatio: 0.9,
+            children: [
+              _buildFeatureCard(
+                context: context,
+                icon: Icons.person,
+                title: "Datos personales",
+                description: "Gestiona tu información de contacto y personal",
+                color: AppTheme.primary,
+                route: 'PersonalDataScreen',
+              ),
+              _buildFeatureCard(
+                context: context,
+                icon: Icons.medical_services_outlined,
+                title: "Datos médicos",
+                description: "Consulta y actualiza tu historial médico",
+                color: AppTheme.diseases,
+                route: 'MedicalDataScreen',
+              ),
+              _buildFeatureCard(
+                context: context,
+                icon: Icons.qr_code,
+                title: "Mi Código QR",
+                description: "Accede rápido a tu información",
+                color: AppTheme.accent,
+                route: 'QRCodeScreen',
+              ),
+            ],
           ),
-
-          const SizedBox(height: 20),
-
-          // Botón Datos médicos
-          _buildHomeButton(
-            context,
-            icon: Icons.medical_services,
-            label: 'Datos médicos',
-            onTap: () {
-              Navigator.pushNamed(context, 'MedicalDataScreen');
-            },
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
-  Widget _buildHomeButton(
-    BuildContext context, {
+  Widget _buildFeatureCard({
+    required BuildContext context,
     required IconData icon,
-    required String label,
-    required Function() onTap,
+    required String title,
+    required String description,
+    required Color color,
+    required String route,
   }) {
     return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        children: [
-          Container(
-            width: 200,
-            height: 200,
-            decoration: BoxDecoration(
-              color: Colors.blueGrey[50],
-              borderRadius: BorderRadius.circular(8),
+      onTap: () {
+        Navigator.pushNamed(context, route);
+      },
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: AppTheme.cardBg,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              offset: const Offset(0, 4),
+              blurRadius: 10,
             ),
-            child: Icon(icon, size: 70, color: Colors.blueGrey),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            label,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: color, size: 30),
             ),
-          ),
-        ],
+            const SizedBox(height: 16),
+            Text(title, style: AppTheme.cardTitle),
+            const SizedBox(height: 8),
+            Text(description, style: AppTheme.cardContent),
+          ],
+        ),
       ),
     );
   }
