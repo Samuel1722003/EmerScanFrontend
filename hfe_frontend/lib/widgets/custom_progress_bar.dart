@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class CustomProgressBar extends StatelessWidget {
   final double progress; // Valor entre 0.0 y 1.0 (ej: 0.25 = 25%)
-  
+
   const CustomProgressBar({super.key, required this.progress});
 
   @override

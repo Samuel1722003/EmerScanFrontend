@@ -52,11 +52,12 @@ class _SignUpScreen2State extends State<SignUpScreen2> {
 
   void _submitForm() {
     if (_isSubmitting) return;
-    
+
     if (_formKey.currentState!.validate()) {
       setState(() => _isSubmitting = true);
-      
-      final datosPersona = ModalRoute.of(context)!.settings.arguments as Persona;
+
+      final datosPersona =
+          ModalRoute.of(context)!.settings.arguments as Persona;
       datosPersona
         ..correo = _emailController.text.trim()
         ..contrasena = _passwordController.text;
@@ -121,7 +122,8 @@ class _SignUpScreen2State extends State<SignUpScreen2> {
                 hint: 'Mínimo 8 caracteres',
                 controller: _passwordController,
                 obscureText: _obscurePassword,
-                toggleObscureText: () => setState(() => _obscurePassword = !_obscurePassword),
+                toggleObscureText:
+                    () => setState(() => _obscurePassword = !_obscurePassword),
                 validator: _validatePassword,
               ),
               const SizedBox(height: 8),
@@ -139,22 +141,23 @@ class _SignUpScreen2State extends State<SignUpScreen2> {
                 child: ElevatedButton(
                   onPressed: _isSubmitting ? null : _submitForm,
                   style: AppTheme.primaryButtonStyle,
-                  child: _isSubmitting
-                      ? SizedBox(
-                          height: 24,
-                          width: 24,
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2.5,
+                  child:
+                      _isSubmitting
+                          ? SizedBox(
+                            height: 24,
+                            width: 24,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2.5,
+                            ),
+                          )
+                          : const Text(
+                            'Continuar',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        )
-                      : const Text(
-                          'Continuar',
-                          style: TextStyle(
-                            fontSize: 16, 
-                            fontWeight: FontWeight.bold
-                          ),
-                        ),
                 ),
               ),
             ],
@@ -231,7 +234,10 @@ class _SignUpScreen2State extends State<SignUpScreen2> {
             ),
             filled: true,
             fillColor: Colors.white,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 16,
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(color: Colors.grey.shade300),

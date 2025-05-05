@@ -1,22 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:hfe_frontend/themes/app_theme.dart';
 
+// Botón para pantalla de soporte
 class SupportButton extends StatelessWidget {
   final String label;
+  final VoidCallback? onPressed;
 
-  const SupportButton({super.key, required this.label});
+  const SupportButton({super.key, required this.label, this.onPressed});
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 8),
       child: ElevatedButton(
-        onPressed: () {},
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.white,
-          foregroundColor: Colors.black,
-          side: const BorderSide(color: Colors.grey),
+        onPressed: onPressed ?? () {},
+        style: AppTheme.primaryButtonStyle,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Text(
+            label,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+          ),
         ),
-        child: Text(label),
       ),
     );
   }

@@ -73,17 +73,20 @@ class _QRCodeScreenState extends State<QRCodeScreen> {
     try {
       final supabase = Supabase.instance.client;
 
-      final userData = await supabase
-          .from('usuario_persona')
-          .select('nombre, apellido_paterno, codigo_qr')
-          .eq('id', userId!)
-          .single();
+      final userData =
+          await supabase
+              .from('usuario_persona')
+              .select('nombre, apellido_paterno, codigo_qr')
+              .eq('id', userId!)
+              .single();
 
       setState(() {
         userName = '${userData['nombre']} ${userData['apellido_paterno']}';
 
         try {
-          final Map<String, dynamic> qrDataMap = jsonDecode(userData['codigo_qr']);
+          final Map<String, dynamic> qrDataMap = jsonDecode(
+            userData['codigo_qr'],
+          );
           qrUrlData = qrDataMap['url'] ?? '';
         } catch (e) {
           // Si el parseo falla, usar el string completo
@@ -131,27 +134,30 @@ class _QRCodeScreenState extends State<QRCodeScreen> {
       );
 
       // Capturar la imagen del QR
-      final RenderRepaintBoundary boundary = qrKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+      final RenderRepaintBoundary boundary =
+          qrKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
       final ui.Image image = await boundary.toImage(pixelRatio: 3.0);
-      final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-      
+      final ByteData? byteData = await image.toByteData(
+        format: ui.ImageByteFormat.png,
+      );
+
       if (byteData == null) {
         Navigator.of(context).pop(); // Cerrar el diálogo de carga
         throw Exception('No se pudo capturar la imagen del QR');
       }
-      
+
       final Uint8List pngBytes = byteData.buffer.asUint8List();
-      
+
       // Cerrar el diálogo de carga
       Navigator.of(context).pop();
-      
+
       // Compartir directamente los bytes como XFile sin guardar en disco
       final result = await Share.shareXFiles(
         [XFile.fromData(pngBytes, mimeType: 'image/png', name: 'qr_code.png')],
         text: 'Información médica de ${userName ?? "Usuario"}',
         subject: 'Código QR médico',
       );
-      
+
       if (result.status == ShareResultStatus.success) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -206,91 +212,101 @@ class _QRCodeScreenState extends State<QRCodeScreen> {
           ),
         ],
       ),
-      body: isLoading
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SizedBox(
-                    width: 50,
-                    height: 50,
-                    child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primary),
-                      strokeWidth: 3,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    "Cargando código QR...",
-                    style: TextStyle(color: AppTheme.textSecondary, fontSize: 16),
-                  ),
-                ],
-              ),
-            )
-          : RefreshIndicator(
-              onRefresh: _loadUserIdAndFetchQR,
-              color: AppTheme.primary,
-              child: SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.all(20.0),
+      body:
+          isLoading
+              ? Center(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const SizedBox(height: 20),
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: AppTheme.cardDecoration,
-                      child: Column(
-                        children: [
-                          Text(
-                            'Información médica de ${userName ?? "Usuario"}',
-                            style: AppTheme.heading,
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 10),
-                          Text(
-                            'Este código permite acceso a tu información médica esencial en caso de emergencia.',
-                            textAlign: TextAlign.center,
-                            style: AppTheme.cardContent,
-                          ),
-                        ],
+                    SizedBox(
+                      width: 50,
+                      height: 50,
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          AppTheme.primary,
+                        ),
+                        strokeWidth: 3,
                       ),
                     ),
-                    const SizedBox(height: 24),
-                    Container(
-                      padding: const EdgeInsets.all(20),
-                      decoration: AppTheme.cardDecoration,
-                      child: Column(
-                        children: [
-                          const Icon(
-                            Icons.qr_code_2,
-                            size: 40,
-                            color: AppTheme.primary,
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'Tu Código QR',
-                            style: AppTheme.subheading,
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 20),
-                          qrUrlData.isEmpty
-                              ? Container(
+                    const SizedBox(height: 16),
+                    Text(
+                      "Cargando código QR...",
+                      style: TextStyle(
+                        color: AppTheme.textSecondary,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
+              )
+              : RefreshIndicator(
+                onRefresh: _loadUserIdAndFetchQR,
+                color: AppTheme.primary,
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.all(20.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const SizedBox(height: 20),
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: AppTheme.cardDecoration,
+                        child: Column(
+                          children: [
+                            Text(
+                              'Información médica de ${userName ?? "Usuario"}',
+                              style: AppTheme.heading,
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 10),
+                            Text(
+                              'Este código permite acceso a tu información médica esencial en caso de emergencia.',
+                              textAlign: TextAlign.center,
+                              style: AppTheme.cardContent,
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: AppTheme.cardDecoration,
+                        child: Column(
+                          children: [
+                            const Icon(
+                              Icons.qr_code_2,
+                              size: 40,
+                              color: AppTheme.primary,
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Tu Código QR',
+                              style: AppTheme.subheading,
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 20),
+                            qrUrlData.isEmpty
+                                ? Container(
                                   height: 200,
                                   width: 200,
                                   decoration: BoxDecoration(
                                     color: Colors.grey[100],
                                     borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(color: Colors.grey[300]!),
+                                    border: Border.all(
+                                      color: Colors.grey[300]!,
+                                    ),
                                   ),
                                   child: Center(
                                     child: Text(
                                       'QR no disponible',
-                                      style: TextStyle(color: AppTheme.textSecondary),
+                                      style: TextStyle(
+                                        color: AppTheme.textSecondary,
+                                      ),
                                     ),
                                   ),
                                 )
-                              : Container(
+                                : Container(
                                   padding: const EdgeInsets.all(16),
                                   decoration: BoxDecoration(
                                     color: Colors.white,
@@ -315,90 +331,107 @@ class _QRCodeScreenState extends State<QRCodeScreen> {
                                         return Center(
                                           child: Text(
                                             'Error al generar QR',
-                                            style: TextStyle(color: Colors.red[700]),
+                                            style: TextStyle(
+                                              color: Colors.red[700],
+                                            ),
                                           ),
                                         );
                                       },
                                     ),
                                   ),
                                 ),
-                          const SizedBox(height: 20),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              ElevatedButton.icon(
-                                onPressed: _shareQRCode,
-                                icon: const Icon(Icons.share),
-                                label: const Text('Compartir'),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppTheme.primary,
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
+                            const SizedBox(height: 20),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                ElevatedButton.icon(
+                                  onPressed: _shareQRCode,
+                                  icon: const Icon(Icons.share),
+                                  label: const Text('Compartir'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppTheme.primary,
+                                    foregroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 12,
+                                    ),
                                   ),
-                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                                 ),
-                              ),
-                              const SizedBox(width: 16),
-                              ElevatedButton.icon(
-                                onPressed: _copyBase64ToClipboard,
-                                icon: const Icon(Icons.copy),
-                                label: const Text('Copiar Código'),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppTheme.secondary,
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
+                                const SizedBox(width: 16),
+                                ElevatedButton.icon(
+                                  onPressed: _copyBase64ToClipboard,
+                                  icon: const Icon(Icons.copy),
+                                  label: const Text('Copiar Código'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppTheme.secondary,
+                                    foregroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 12,
+                                    ),
                                   ),
-                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                                 ),
-                              ),
-                            ],
-                          ),
-                        ],
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 24),
-                    Container(
-                      padding: const EdgeInsets.all(20),
-                      decoration: AppTheme.cardDecoration,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(Icons.info_outline, color: AppTheme.primary),
-                              const SizedBox(width: 10),
-                              Text('¿Cómo utilizar este QR?', style: AppTheme.subheading),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-                          _buildInstructionStep(
-                            icon: Icons.qr_code_scanner,
-                            text: 'Escanea el código QR con la cámara de tu dispositivo.',
-                          ),
-                          const SizedBox(height: 12),
-                          _buildInstructionStep(
-                            icon: Icons.medical_information,
-                            text: 'Accede a tu información médica rápidamente.',
-                          ),
-                          const SizedBox(height: 12),
-                          _buildInstructionStep(
-                            icon: Icons.emergency,
-                            text: 'Úsalo solo en caso de emergencia o cuando un profesional médico lo solicite.',
-                          ),
-                          const SizedBox(height: 12),
-                          _buildInstructionStep(
-                            icon: Icons.privacy_tip,
-                            text: 'Tu información está segura y protegida.',
-                          ),
-                        ],
+                      const SizedBox(height: 24),
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: AppTheme.cardDecoration,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.info_outline,
+                                  color: AppTheme.primary,
+                                ),
+                                const SizedBox(width: 10),
+                                Text(
+                                  '¿Cómo utilizar este QR?',
+                                  style: AppTheme.subheading,
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                            _buildInstructionStep(
+                              icon: Icons.qr_code_scanner,
+                              text:
+                                  'Escanea el código QR con la cámara de tu dispositivo.',
+                            ),
+                            const SizedBox(height: 12),
+                            _buildInstructionStep(
+                              icon: Icons.medical_information,
+                              text:
+                                  'Accede a tu información médica rápidamente.',
+                            ),
+                            const SizedBox(height: 12),
+                            _buildInstructionStep(
+                              icon: Icons.emergency,
+                              text:
+                                  'Úsalo solo en caso de emergencia o cuando un profesional médico lo solicite.',
+                            ),
+                            const SizedBox(height: 12),
+                            _buildInstructionStep(
+                              icon: Icons.privacy_tip,
+                              text: 'Tu información está segura y protegida.',
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
     );
   }
 
@@ -415,12 +448,7 @@ class _QRCodeScreenState extends State<QRCodeScreen> {
           child: Icon(icon, size: 20, color: AppTheme.primary),
         ),
         const SizedBox(width: 12),
-        Expanded(
-          child: Text(
-            text,
-            style: AppTheme.cardContent,
-          ),
-        ),
+        Expanded(child: Text(text, style: AppTheme.cardContent)),
       ],
     );
   }

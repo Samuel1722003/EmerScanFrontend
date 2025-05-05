@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 
 class BMIIndicator extends StatelessWidget {
   final double bmi;
-  
+
   const BMIIndicator({super.key, required this.bmi});
-  
+
   Color _getBmiColor() {
     if (bmi < 18.5) return Colors.blue;
     if (bmi < 25) return Colors.green;
     if (bmi < 30) return Colors.orange;
     return Colors.red;
   }
-  
+
   String _getBmiCategory() {
     if (bmi < 18.5) return "Bajo peso";
     if (bmi < 25) return "Normal";
@@ -39,10 +39,7 @@ class BMIIndicator extends StatelessWidget {
         children: [
           const Text(
             "Índice de Masa Corporal (IMC)",
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-            ),
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
           const SizedBox(height: 10),
           Row(
@@ -83,7 +80,9 @@ class BMIIndicator extends StatelessWidget {
                       child: LinearProgressIndicator(
                         value: (bmi / 40).clamp(0.0, 1.0),
                         backgroundColor: Colors.grey.shade200,
-                        valueColor: AlwaysStoppedAnimation<Color>(_getBmiColor()),
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          _getBmiColor(),
+                        ),
                         minHeight: 8,
                       ),
                     ),
@@ -95,10 +94,7 @@ class BMIIndicator extends StatelessWidget {
           const SizedBox(height: 10),
           Text(
             "Categorías: Bajo peso (<18.5) • Normal (18.5-24.9) • Sobrepeso (25-29.9) • Obesidad (>30)",
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey.shade600,
-            ),
+            style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
           ),
         ],
       ),

@@ -19,7 +19,8 @@ class ExpandableSection extends StatefulWidget {
   State<ExpandableSection> createState() => _ExpandableSectionState();
 }
 
-class _ExpandableSectionState extends State<ExpandableSection> with SingleTickerProviderStateMixin {
+class _ExpandableSectionState extends State<ExpandableSection>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _iconTurn;
   late Animation<double> _heightFactor;
@@ -84,10 +85,7 @@ class _ExpandableSectionState extends State<ExpandableSection> with SingleTicker
                   children: [
                     Icon(widget.icon, color: AppTheme.primary),
                     const SizedBox(width: 12),
-                    Text(
-                      widget.title,
-                      style: AppTheme.subheading,
-                    ),
+                    Text(widget.title, style: AppTheme.subheading),
                   ],
                 ),
                 RotationTransition(

@@ -17,9 +17,7 @@ class SaveButtonWidget extends StatelessWidget {
           backgroundColor: Colors.teal,
           padding: const EdgeInsets.symmetric(vertical: 15),
           textStyle: const TextStyle(fontSize: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
       ),
     );

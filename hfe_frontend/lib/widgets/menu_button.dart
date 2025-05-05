@@ -6,7 +6,8 @@ class MenuButton extends StatelessWidget {
   final String text;
   final VoidCallback onTap;
 
-  const MenuButton({super.key, 
+  const MenuButton({
+    super.key,
     required this.icon,
     required this.text,
     required this.onTap,
@@ -23,16 +24,12 @@ class MenuButton extends StatelessWidget {
             height: 200,
             decoration: BoxDecoration(
               color: Colors.blueGrey[50], // Color de fondo del botón
-              borderRadius: BorderRadius.circular(8), // Bordes levemente redondeados
-              border: Border.all(
-                color: Colors.grey[300]!,
-              ),
+              borderRadius: BorderRadius.circular(
+                8,
+              ), // Bordes levemente redondeados
+              border: Border.all(color: Colors.grey[300]!),
             ),
-            child: Icon(
-              icon,
-              size: 75,
-              color: Colors.blueGrey[700],
-            ),
+            child: Icon(icon, size: 75, color: Colors.blueGrey[700]),
           ),
           SizedBox(height: 10),
           Text(

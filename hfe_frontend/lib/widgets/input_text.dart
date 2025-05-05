@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class InputText extends StatefulWidget {
   final String hintText;
   final bool obscureText;
-  
+
   const InputText({
     super.key,
     required this.hintText,
@@ -22,7 +22,10 @@ class _InputTextState extends State<InputText> {
       child: TextField(
         obscureText: widget.obscureText,
         decoration: InputDecoration(
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 14,
+          ),
           hintText: widget.hintText,
           hintStyle: TextStyle(color: Colors.grey[600]),
           border: OutlineInputBorder(

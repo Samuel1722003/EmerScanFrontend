@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hfe_frontend/screens/screen.dart';
 import 'package:hfe_frontend/screens/widgets.dart';
 
 class PersonalizationScreen extends StatelessWidget {
@@ -7,35 +8,37 @@ class PersonalizationScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Personalización")),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Column(
-                children: [
-                  CircleAvatar(
-                    backgroundColor: Colors.amber.shade100,
-                    radius: 30,
-                    child: const Icon(Icons.format_paint, color: Colors.amber, size: 30),
-                  ),
-                  const SizedBox(height: 10),
-                  const Text(
-                    "Personalización",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  const Divider(thickness: 1),
-                ],
+      appBar: AppBar(
+        title: const Text("Personalización"),
+        backgroundColor: AppTheme.background,
+        elevation: 0,
+      ),
+      body: Container(
+        color: AppTheme.background,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const CustomSectionIcon(
+                icon: Icons.format_paint,
+                title: "Personalización",
+                color: Colors.amber,
               ),
-            ),
-            const SizedBox(height: 20),
-            const ThemeSwitch(),
-            const LanguageSelector(),
-            const TextSizeSlider(),
-            const BoldTextSwitch(),
-          ],
+              const SizedBox(height: 20),
+
+              const ThemeSwitch(),
+              const SizedBox(height: 10),
+
+              const LanguageSelector(),
+              const SizedBox(height: 10),
+
+              const TextSizeSlider(),
+              const SizedBox(height: 10),
+
+              const BoldTextSwitch(),
+            ],
+          ),
         ),
       ),
     );

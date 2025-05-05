@@ -10,73 +10,73 @@ class SettingsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Ajustes'),
-        backgroundColor: Colors.lightBlue[50],
+        backgroundColor: AppTheme.background,
+        elevation: 0,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Center(
-              child: Text(
-                "Ajustes",
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+      body: Container(
+        color: AppTheme.background,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const CustomSectionIcon(
+                icon: Icons.settings,
+                title: "Ajustes",
+                color: AppTheme.primary,
               ),
-            ),
-            const SizedBox(height: 10),
-            const Divider(),
-            const SizedBox(height: 20),
+              const SizedBox(height: 16),
 
-            // Usamos el widget SettingsOption en lugar de ListTile
-            SettingsOption(
-              icon: Icons.format_paint,
-              label: "Personalización",
-              color: Colors.amberAccent,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const PersonalizationScreen(),
-                  ),
-                );
-              }, // Acción al presionar
-            ),
-            SettingsOption(
-              icon: Icons.notifications,
-              label: "Notificaciones",
-              color: Colors.purpleAccent,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const NotificationsScreen(),
-                  ),
-                );
-              },
-            ),
-            SettingsOption(
-              icon: Icons.lock,
-              label: "Seguridad y privacidad",
-              color: Colors.cyan,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const SecurityScreen()),
-                );
-              },
-            ),
-            SettingsOption(
-              icon: Icons.headset_mic,
-              label: "Ayuda y soporte",
-              color: Colors.pinkAccent,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const SupportScreen()),
-                );
-              },
-            ),
-          ],
+              SettingsOption(
+                icon: Icons.format_paint,
+                label: "Personalización",
+                color: Colors.amber,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const PersonalizationScreen(),
+                    ),
+                  );
+                },
+              ),
+              SettingsOption(
+                icon: Icons.notifications,
+                label: "Notificaciones",
+                color: AppTheme.accent,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const NotificationsScreen(),
+                    ),
+                  );
+                },
+              ),
+              SettingsOption(
+                icon: Icons.lock,
+                label: "Seguridad y privacidad",
+                color: AppTheme.hospitalizations,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const SecurityScreen()),
+                  );
+                },
+              ),
+              SettingsOption(
+                icon: Icons.headset_mic,
+                label: "Ayuda y soporte",
+                color: AppTheme.diseases,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const SupportScreen()),
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );

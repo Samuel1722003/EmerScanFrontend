@@ -21,10 +21,10 @@ class SignUpDropdown extends StatelessWidget {
         labelText: label,
         border: const OutlineInputBorder(),
       ),
-      items: items.map((item) => DropdownMenuItem(
-            value: item,
-            child: Text(item),
-          )).toList(),
+      items:
+          items
+              .map((item) => DropdownMenuItem(value: item, child: Text(item)))
+              .toList(),
       onChanged: onChanged,
       validator: validator,
     );

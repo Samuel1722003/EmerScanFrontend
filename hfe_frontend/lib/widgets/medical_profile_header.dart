@@ -30,10 +30,7 @@ class MedicalProfileHeader extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            AppTheme.primary.withOpacity(0.8),
-            AppTheme.secondary,
-          ],
+          colors: [AppTheme.primary.withOpacity(0.8), AppTheme.secondary],
         ),
         borderRadius: const BorderRadius.only(
           bottomLeft: Radius.circular(24),
@@ -62,7 +59,7 @@ class MedicalProfileHeader extends StatelessWidget {
                 ),
                 child: Center(
                   child: Text(
-                    nombre != null && nombre!.isNotEmpty 
+                    nombre != null && nombre!.isNotEmpty
                         ? nombre![0].toUpperCase()
                         : "?",
                     style: const TextStyle(
@@ -89,19 +86,27 @@ class MedicalProfileHeader extends StatelessWidget {
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        const Icon(Icons.height, size: 16, color: Colors.white70),
+                        const Icon(
+                          Icons.height,
+                          size: 16,
+                          color: Colors.white70,
+                        ),
                         const SizedBox(width: 4),
                         Text(
-                          estatura != null 
+                          estatura != null
                               ? "${estatura!.toStringAsFixed(2)} m"
                               : "Estatura no registrada",
                           style: const TextStyle(color: Colors.white70),
                         ),
                         const SizedBox(width: 12),
-                        const Icon(Icons.fitness_center, size: 16, color: Colors.white70),
+                        const Icon(
+                          Icons.fitness_center,
+                          size: 16,
+                          color: Colors.white70,
+                        ),
                         const SizedBox(width: 4),
                         Text(
-                          peso != null 
+                          peso != null
                               ? "${peso!.toStringAsFixed(1)} kg"
                               : "Peso no registrado",
                           style: const TextStyle(color: Colors.white70),
@@ -112,7 +117,11 @@ class MedicalProfileHeader extends StatelessWidget {
                     if (bmi != null)
                       Row(
                         children: [
-                          const Icon(Icons.monitor_weight, size: 16, color: Colors.white70),
+                          const Icon(
+                            Icons.monitor_weight,
+                            size: 16,
+                            color: Colors.white70,
+                          ),
                           const SizedBox(width: 4),
                           Text(
                             "IMC: ${bmi.toStringAsFixed(1)}",
@@ -158,7 +167,11 @@ class MedicalProfileHeader extends StatelessWidget {
           if (contactoRelacion != null)
             Row(
               children: [
-                const Icon(Icons.family_restroom, size: 16, color: Colors.white70),
+                const Icon(
+                  Icons.family_restroom,
+                  size: 16,
+                  color: Colors.white70,
+                ),
                 const SizedBox(width: 4),
                 Text(
                   "Relación: $contactoRelacion",

@@ -42,7 +42,8 @@ class SignUpInputText extends StatelessWidget {
       validator: validator,
       decoration: InputDecoration(
         hintText: hintText,
-        prefixIcon: prefixIcon != null ? Icon(prefixIcon, color: Colors.grey) : null,
+        prefixIcon:
+            prefixIcon != null ? Icon(prefixIcon, color: Colors.grey) : null,
         filled: true,
         fillColor: Colors.grey.shade200,
         border: OutlineInputBorder(

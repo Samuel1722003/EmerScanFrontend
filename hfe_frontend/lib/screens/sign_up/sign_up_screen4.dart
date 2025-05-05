@@ -65,18 +65,15 @@ class SignUpScreen4 extends StatelessWidget {
                 onPressed: () {
                   // Navegar a LoginScreen y limpiar el stack de navegación
                   Navigator.pushNamedAndRemoveUntil(
-                    context, 
-                    'LoginScreen', 
-                    (route) => false
+                    context,
+                    'LoginScreen',
+                    (route) => false,
                   );
                 },
                 style: AppTheme.primaryButtonStyle,
                 child: const Text(
                   'Iniciar Sesión',
-                  style: TextStyle(
-                    fontSize: 16, 
-                    fontWeight: FontWeight.bold
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               ),
             ),

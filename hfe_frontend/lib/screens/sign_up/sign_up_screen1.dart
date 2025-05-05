@@ -57,21 +57,21 @@ class _SignUpScreen1State extends State<SignUpScreen1> {
     if (value == null || value.isEmpty) {
       return 'Por favor ingresa tu fecha de nacimiento';
     }
-    
+
     final parts = value.split('/');
     final day = int.tryParse(parts[0]);
     final month = int.tryParse(parts[1]);
     final year = int.tryParse(parts[2]);
-    
+
     if (day == null || month == null || year == null) {
       return 'Fecha inválida';
     }
-    
+
     try {
       final birthDate = DateTime(year, month, day);
       final now = DateTime.now();
       final age = now.difference(birthDate).inDays ~/ 365;
-      
+
       if (age < 13) {
         return 'Debes tener al menos 13 años';
       }
@@ -81,7 +81,7 @@ class _SignUpScreen1State extends State<SignUpScreen1> {
     } catch (e) {
       return 'Fecha inválida';
     }
-    
+
     return null;
   }
 
@@ -96,31 +96,35 @@ class _SignUpScreen1State extends State<SignUpScreen1> {
     if (value == null || value.isEmpty) {
       return 'Por favor ingresa tu teléfono';
     }
-    
+
     // Eliminar espacios y caracteres especiales
     final cleanPhone = value.replaceAll(RegExp(r'[^\d+]'), '');
-    
+
     // Validar teléfono mexicano (10 dígitos) o internacional
     if (!RegExp(r'^(\+?\d{1,3}? ?)?\d{10}$').hasMatch(cleanPhone)) {
       return 'Teléfono inválido';
     }
-    
+
     return null;
   }
 
   void _submitForm() {
     if (_isSubmitting) return;
-    
+
     if (_formKey.currentState!.validate()) {
       setState(() => _isSubmitting = true);
-      
-      final datosPersona = Persona()
-        ..nombre = _nameController.text.trim()
-        ..apellidos = _lastNameController.text.trim()
-        ..fechaNacimiento = _birthDateController.text
-        ..genero = _genderValue
-        ..telefono = _phoneController.text.replaceAll(RegExp(r'[^\d+]'), '');
-      
+
+      final datosPersona =
+          Persona()
+            ..nombre = _nameController.text.trim()
+            ..apellidos = _lastNameController.text.trim()
+            ..fechaNacimiento = _birthDateController.text
+            ..genero = _genderValue
+            ..telefono = _phoneController.text.replaceAll(
+              RegExp(r'[^\d+]'),
+              '',
+            );
+
       Navigator.pushNamed(
         context,
         'RegisterScreen2',
@@ -164,23 +168,23 @@ class _SignUpScreen1State extends State<SignUpScreen1> {
               ),
               const SizedBox(height: 32),
               _buildTextField(
-                label: 'Nombres', 
-                hint: 'Ingresa tu nombre', 
+                label: 'Nombres',
+                hint: 'Ingresa tu nombre',
                 controller: _nameController,
                 icon: Icons.person_outline,
                 validator: _validateName,
               ),
               const SizedBox(height: 20),
               _buildTextField(
-                label: 'Apellidos', 
-                hint: 'Ingresa tus apellidos', 
+                label: 'Apellidos',
+                hint: 'Ingresa tus apellidos',
                 controller: _lastNameController,
                 icon: Icons.person_outline,
                 validator: _validateLastName,
               ),
               const SizedBox(height: 20),
               _buildTextField(
-                label: 'Fecha de nacimiento', 
+                label: 'Fecha de nacimiento',
                 hint: 'DD/MM/AAAA',
                 controller: _birthDateController,
                 icon: Icons.calendar_today,
@@ -193,13 +197,14 @@ class _SignUpScreen1State extends State<SignUpScreen1> {
                 hint: 'Selecciona tu género',
                 icon: Icons.wc,
                 items: const ['Masculino', 'Femenino', 'Prefiero no decir'],
-                onChanged: (value) => setState(() => _genderValue = value ?? ''),
+                onChanged:
+                    (value) => setState(() => _genderValue = value ?? ''),
                 validator: _validateGender,
               ),
               const SizedBox(height: 20),
               _buildTextField(
-                label: 'Teléfono', 
-                hint: 'Ej: 5512345678', 
+                label: 'Teléfono',
+                hint: 'Ej: 5512345678',
                 controller: _phoneController,
                 icon: Icons.phone,
                 validator: _validatePhone,
@@ -210,22 +215,23 @@ class _SignUpScreen1State extends State<SignUpScreen1> {
                 child: ElevatedButton(
                   onPressed: _isSubmitting ? null : _submitForm,
                   style: AppTheme.primaryButtonStyle,
-                  child: _isSubmitting
-                      ? SizedBox(
-                          height: 24,
-                          width: 24,
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2.5,
+                  child:
+                      _isSubmitting
+                          ? SizedBox(
+                            height: 24,
+                            width: 24,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2.5,
+                            ),
+                          )
+                          : const Text(
+                            'Continuar',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        )
-                      : const Text(
-                          'Continuar',
-                          style: TextStyle(
-                            fontSize: 16, 
-                            fontWeight: FontWeight.bold
-                          ),
-                        ),
                 ),
               ),
             ],
@@ -261,30 +267,36 @@ class _SignUpScreen1State extends State<SignUpScreen1> {
           style: const TextStyle(fontSize: 16),
           validator: validator,
           readOnly: isDate,
-          onTap: isDate ? () async {
-            FocusScope.of(context).requestFocus(FocusNode());
-            final DateTime? picked = await showDatePicker(
-              context: context,
-              initialDate: DateTime.now().subtract(const Duration(days: 365 * 18)),
-              firstDate: DateTime(1900),
-              lastDate: DateTime.now(),
-              builder: (context, child) {
-                return Theme(
-                  data: Theme.of(context).copyWith(
-                    colorScheme: ColorScheme.light(
-                      primary: AppTheme.primary,
-                      onPrimary: Colors.white,
-                      onSurface: AppTheme.textPrimary,
-                    ),
-                  ),
-                  child: child!,
-                );
-              },
-            );
-            if (picked != null) {
-              controller.text = "${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}";
-            }
-          } : null,
+          onTap:
+              isDate
+                  ? () async {
+                    FocusScope.of(context).requestFocus(FocusNode());
+                    final DateTime? picked = await showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now().subtract(
+                        const Duration(days: 365 * 18),
+                      ),
+                      firstDate: DateTime(1900),
+                      lastDate: DateTime.now(),
+                      builder: (context, child) {
+                        return Theme(
+                          data: Theme.of(context).copyWith(
+                            colorScheme: ColorScheme.light(
+                              primary: AppTheme.primary,
+                              onPrimary: Colors.white,
+                              onSurface: AppTheme.textPrimary,
+                            ),
+                          ),
+                          child: child!,
+                        );
+                      },
+                    );
+                    if (picked != null) {
+                      controller.text =
+                          "${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}";
+                    }
+                  }
+                  : null,
         ),
       ],
     );
@@ -312,24 +324,19 @@ class _SignUpScreen1State extends State<SignUpScreen1> {
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
           decoration: AppTheme.inputDecoration(label, hint, icon: icon),
-          items: items.map((String value) {
-            return DropdownMenuItem<String>(
-              value: value,
-              child: Text(value),
-            );
-          }).toList(),
+          items:
+              items.map((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
           onChanged: onChanged,
           validator: validator,
-          style: const TextStyle(
-            fontSize: 16,
-            color: AppTheme.textPrimary,
-          ),
+          style: const TextStyle(fontSize: 16, color: AppTheme.textPrimary),
           icon: const Icon(Icons.arrow_drop_down, color: AppTheme.primary),
           isExpanded: true,
-          hint: Text(
-            hint,
-            style: TextStyle(color: Colors.grey.shade500),
-          ),
+          hint: Text(hint, style: TextStyle(color: Colors.grey.shade500)),
           dropdownColor: Colors.white,
         ),
       ],

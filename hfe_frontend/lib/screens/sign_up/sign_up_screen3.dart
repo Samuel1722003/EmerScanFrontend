@@ -29,7 +29,7 @@ class _SignUpScreen3State extends State<SignUpScreen3> {
     if (value == null || value.isEmpty) {
       return 'Por favor ingresa tu correo electrónico';
     }
-    
+
     final personaData = ModalRoute.of(context)!.settings.arguments as Persona;
     if (value != personaData.correo) {
       return 'El correo no coincide con el ingresado anteriormente';
@@ -41,7 +41,7 @@ class _SignUpScreen3State extends State<SignUpScreen3> {
     if (value == null || value.isEmpty) {
       return 'Por favor ingresa tu contraseña';
     }
-    
+
     final personaData = ModalRoute.of(context)!.settings.arguments as Persona;
     if (value != personaData.contrasena) {
       return 'La contraseña no coincide con la ingresada anteriormente';
@@ -114,7 +114,8 @@ class _SignUpScreen3State extends State<SignUpScreen3> {
         final usuarioId = insertResponse['id'];
 
         // Generar URL para el QR (usa tu dominio de Firebase Hosting real)
-        final qrUrl = 'https://emerscan-38fb8.web.app/#MedicalDataScreen/$usuarioId';
+        final qrUrl =
+            'https://emerscan-38fb8.web.app/#MedicalDataScreen/$usuarioId';
 
         // Generar datos del QR incluyendo la URL
         final qrData = jsonEncode({
@@ -207,31 +208,34 @@ class _SignUpScreen3State extends State<SignUpScreen3> {
                 hint: 'Ingresa tu contraseña',
                 controller: _passwordController,
                 obscureText: _obscurePassword,
-                toggleObscureText: () => setState(() => _obscurePassword = !_obscurePassword),
+                toggleObscureText:
+                    () => setState(() => _obscurePassword = !_obscurePassword),
                 validator: _validatePassword,
               ),
               const SizedBox(height: 40),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: _isSubmitting ? null : () => _crearCuenta(personaData),
+                  onPressed:
+                      _isSubmitting ? null : () => _crearCuenta(personaData),
                   style: AppTheme.primaryButtonStyle,
-                  child: _isSubmitting
-                      ? SizedBox(
-                          height: 24,
-                          width: 24,
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2.5,
+                  child:
+                      _isSubmitting
+                          ? SizedBox(
+                            height: 24,
+                            width: 24,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2.5,
+                            ),
+                          )
+                          : const Text(
+                            'Crear cuenta',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        )
-                      : const Text(
-                          'Crear cuenta',
-                          style: TextStyle(
-                            fontSize: 16, 
-                            fontWeight: FontWeight.bold
-                          ),
-                        ),
                 ),
               ),
             ],
@@ -308,7 +312,10 @@ class _SignUpScreen3State extends State<SignUpScreen3> {
             ),
             filled: true,
             fillColor: Colors.white,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 16,
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(color: Colors.grey.shade300),

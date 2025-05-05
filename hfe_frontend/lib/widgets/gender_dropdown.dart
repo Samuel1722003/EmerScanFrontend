@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-
 class GenderDropdownWidget extends StatelessWidget {
   final String selectedGender;
   final ValueChanged<String?> onChanged;
@@ -22,26 +21,28 @@ class GenderDropdownWidget extends StatelessWidget {
         borderRadius: BorderRadius.circular(6),
         border: Border.all(color: Colors.grey.shade400),
       ),
-      child: isEditable
-          ? DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                value: selectedGender,
-                items: ['Femenino', 'Masculino', 'Otro'].map((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
-                onChanged: onChanged,
+      child:
+          isEditable
+              ? DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  value: selectedGender,
+                  items:
+                      ['Femenino', 'Masculino', 'Otro'].map((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        );
+                      }).toList(),
+                  onChanged: onChanged,
+                ),
+              )
+              : Padding(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                child: Text(
+                  selectedGender,
+                  style: TextStyle(fontSize: 16, color: Colors.grey[800]),
+                ),
               ),
-            )
-          : Padding(
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              child: Text(
-                selectedGender,
-                style: TextStyle(fontSize: 16, color: Colors.grey[800]),
-              ),
-            ),
     );
   }
 }
