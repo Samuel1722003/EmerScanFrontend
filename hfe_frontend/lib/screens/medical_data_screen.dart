@@ -917,28 +917,6 @@ class _MedicalDataScreenState extends State<MedicalDataScreen> {
                 ],
               ),
             ),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Center(
-                  child:
-                      widget.userId == null
-                          ? ElevatedButton.icon(
-                            icon: const Icon(Icons.edit),
-                            label: const Text("Actualizar datos médicos"),
-                            onPressed:
-                                () => setState(() => isRegistering = true),
-                            style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 24,
-                                vertical: 12,
-                              ),
-                            ),
-                          )
-                          : SizedBox(),
-                ),
-              ),
-            ),
           ],
         ),
       ),
