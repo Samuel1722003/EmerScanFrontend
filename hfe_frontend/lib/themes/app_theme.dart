@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class AppTheme {
   // Paleta de colores principal
-  static const Color primary = Color(0xFF3F51B5); // Indigo principal
+  static const Color primary = Color.fromARGB(255, 63, 157, 181); // Color principal
   static const Color secondary = Color(0xFF2196F3); // Azul secundario
   static const Color accent = Color(0xFFE91E63); // Rosa acento
   static const Color background = Color(0xFFF5F7FA); // Fondo claro
