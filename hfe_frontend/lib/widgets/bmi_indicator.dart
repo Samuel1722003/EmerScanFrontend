@@ -22,7 +22,7 @@ class BMIIndicator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -39,14 +39,14 @@ class BMIIndicator extends StatelessWidget {
         children: [
           const Text(
             "Índice de Masa Corporal (IMC)",
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 14),
           Row(
             children: [
               Container(
-                width: 50,
-                height: 50,
+                width: 65,
+                height: 65,
                 decoration: BoxDecoration(
                   color: _getBmiColor().withOpacity(0.2),
                   shape: BoxShape.circle,
@@ -57,12 +57,12 @@ class BMIIndicator extends StatelessWidget {
                     style: TextStyle(
                       color: _getBmiColor(),
                       fontWeight: FontWeight.bold,
-                      fontSize: 18,
+                      fontSize: 22,
                     ),
                   ),
                 ),
               ),
-              const SizedBox(width: 15),
+              const SizedBox(width: 18),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -71,10 +71,11 @@ class BMIIndicator extends StatelessWidget {
                       _getBmiCategory(),
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
+                        fontSize: 18,
                         color: _getBmiColor(),
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 6),
                     ClipRRect(
                       borderRadius: BorderRadius.circular(8),
                       child: LinearProgressIndicator(
@@ -83,7 +84,7 @@ class BMIIndicator extends StatelessWidget {
                         valueColor: AlwaysStoppedAnimation<Color>(
                           _getBmiColor(),
                         ),
-                        minHeight: 8,
+                        minHeight: 10,
                       ),
                     ),
                   ],
@@ -91,10 +92,10 @@ class BMIIndicator extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
           Text(
             "Categorías: Bajo peso (<18.5) • Normal (18.5-24.9) • Sobrepeso (25-29.9) • Obesidad (>30)",
-            style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+            style: TextStyle(fontSize: 14, color: Colors.grey.shade700),
           ),
         ],
       ),

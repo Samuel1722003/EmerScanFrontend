@@ -52,24 +52,33 @@ class _MedicalDataScreenState extends State<MedicalDataScreen> {
     String content,
     IconData icon,
   ) {
+    final screenSize = MediaQuery.of(context).size;
+    final isTablet = screenSize.width >= 600;
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: Row(
             children: [
-              Icon(icon, color: AppTheme.primary),
+              Icon(icon, color: AppTheme.primary, size: isTablet ? 32 : 28),
               const SizedBox(width: 10),
-              Text(title),
+              Text(title, style: TextStyle(fontSize: isTablet ? 26 : 22)),
             ],
           ),
           content: SingleChildScrollView(
-            child: Text(content, style: const TextStyle(fontSize: 16)),
+            child: Text(
+              content,
+              style: TextStyle(fontSize: isTablet ? 22 : 20),
+            ),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cerrar'),
+              child: Text(
+                'Cerrar',
+                style: TextStyle(fontSize: isTablet ? 20 : 18),
+              ),
             ),
           ],
           shape: RoundedRectangleBorder(
@@ -623,6 +632,15 @@ class _MedicalDataScreenState extends State<MedicalDataScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Obtenemos el tamaño de la pantalla para hacer la UI responsiva
+    final screenSize = MediaQuery.of(context).size;
+    final isTablet = screenSize.width >= 600;
+
+    // Definimos tamaños de fuente responsivos
+    final headingSize = isTablet ? 24.0 : 22.0;
+    final subheadingSize = isTablet ? 20.0 : 18.0;
+    final contentSize = isTablet ? 16.0 : 14.0;
+
     if (isLoading) {
       return Scaffold(
         backgroundColor: AppTheme.background,
@@ -631,17 +649,20 @@ class _MedicalDataScreenState extends State<MedicalDataScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               SizedBox(
-                width: 50,
-                height: 50,
+                width: isTablet ? 60 : 50,
+                height: isTablet ? 60 : 50,
                 child: CircularProgressIndicator(
                   valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primary),
-                  strokeWidth: 3,
+                  strokeWidth: isTablet ? 4 : 3,
                 ),
               ),
               const SizedBox(height: 16),
               Text(
                 "Cargando información médica...",
-                style: TextStyle(color: AppTheme.textSecondary, fontSize: 16),
+                style: TextStyle(
+                  color: AppTheme.textSecondary,
+                  fontSize: isTablet ? 18 : 16,
+                ),
               ),
             ],
           ),
@@ -653,42 +674,63 @@ class _MedicalDataScreenState extends State<MedicalDataScreen> {
       return Scaffold(
         backgroundColor: AppTheme.background,
         appBar: AppBar(
-          title: const Text('Datos Médicos'),
+          title: Text(
+            'Datos Médicos',
+            style: TextStyle(
+              fontSize: isTablet ? 22 : 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           backgroundColor: AppTheme.primary,
           elevation: 0,
           centerTitle: true,
         ),
         body: Center(
           child: Container(
-            padding: const EdgeInsets.all(24),
-            margin: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(isTablet ? 32 : 24),
+            margin: EdgeInsets.all(isTablet ? 24 : 16),
             decoration: AppTheme.cardDecoration,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(
+                Icon(
                   Icons.medical_information,
-                  size: 80,
+                  size: isTablet ? 100 : 80,
                   color: AppTheme.primary,
                 ),
-                const SizedBox(height: 24),
-                const Text(
+                SizedBox(height: isTablet ? 32 : 24),
+                Text(
                   'No se encontraron datos médicos registrados',
-                  style: AppTheme.subheading,
+                  style: TextStyle(
+                    fontSize: subheadingSize,
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.textPrimary,
+                  ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 8),
-                const Text(
+                SizedBox(height: isTablet ? 12 : 8),
+                Text(
                   'Para recibir una mejor atención médica, te recomendamos registrar tu información médica básica.',
-                  style: TextStyle(color: AppTheme.textSecondary),
+                  style: TextStyle(
+                    color: AppTheme.textSecondary,
+                    fontSize: contentSize,
+                  ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 32),
+                SizedBox(height: isTablet ? 40 : 32),
                 ElevatedButton.icon(
                   onPressed: () => setState(() => isRegistering = true),
                   icon: const Icon(Icons.add_circle_outline),
-                  label: const Text('Registrar Datos Médicos'),
-                  style: AppTheme.primaryButtonStyle,
+                  label: Text(
+                    'Registrar Datos Médicos',
+                    style: TextStyle(fontSize: isTablet ? 18 : 16),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(
+                      vertical: isTablet ? 20 : 16,
+                      horizontal: isTablet ? 32 : 24,
+                    ),
+                  ).merge(AppTheme.primaryButtonStyle),
                 ),
               ],
             ),
@@ -700,7 +742,10 @@ class _MedicalDataScreenState extends State<MedicalDataScreen> {
     if (isRegistering) {
       return Scaffold(
         appBar: AppBar(
-          title: const Text('Registro Médico'),
+          title: Text(
+            'Registro Médico',
+            style: TextStyle(fontSize: isTablet ? 22 : 20),
+          ),
           backgroundColor: AppTheme.primary,
           elevation: 0,
           leading: IconButton(
@@ -708,7 +753,8 @@ class _MedicalDataScreenState extends State<MedicalDataScreen> {
             onPressed: () => setState(() => isRegistering = false),
           ),
         ),
-        body: _buildRegistrationForm(),
+        body:
+            _buildRegistrationForm(), // Este método tendría que adaptarse también
       );
     }
 
@@ -719,12 +765,169 @@ class _MedicalDataScreenState extends State<MedicalDataScreen> {
     final bmi =
         hasBmi ? pesoPaciente! / (estaturaPaciente! * estaturaPaciente!) : null;
 
+    // Lista de widgets para las tarjetas médicas
+    final List<Widget> medicalCards = [
+      // Primera fila: Grupo Sanguíneo y Alergias (2 columnas)
+      SizedBox(
+        height: isTablet ? 200 : 180,
+        child: Row(
+          children: [
+            Expanded(
+              child: MedicalCard(
+                title: "Grupo Sanguíneo",
+                content: historialClinico0['tipo_sangre'] ?? "No especificado",
+                icon: Icons.bloodtype,
+                color: AppTheme.bloodType,
+                onTap:
+                    () => _showDetailDialog(
+                      context,
+                      "Grupo Sanguíneo",
+                      historialClinico0['tipo_sangre'] ?? "No especificado",
+                      Icons.bloodtype,
+                    ),
+              ),
+            ),
+            SizedBox(width: 16),
+            Expanded(
+              child: MedicalCard(
+                title: "Alergias",
+                content: formatAlergias(),
+                icon: Icons.warning_amber_rounded,
+                color: AppTheme.allergies,
+                onTap:
+                    () => _showDetailDialog(
+                      context,
+                      "Alergias",
+                      formatAlergias(),
+                      Icons.warning_amber_rounded,
+                    ),
+              ),
+            ),
+          ],
+        ),
+      ),
+
+      SizedBox(height: 16),
+      SizedBox(
+        height: isTablet ? 180 : 160,
+        child: MedicalCard(
+          title: "Enfermedades",
+          content: formatEnfermedades(),
+          icon: Icons.medical_services_outlined,
+          color: AppTheme.diseases,
+          onTap:
+              () => _showDetailDialog(
+                context,
+                "Enfermedades",
+                formatEnfermedades(),
+                Icons.medical_services_outlined,
+              ),
+        ),
+      ),
+
+      SizedBox(height: 16),
+      SizedBox(
+        height: isTablet ? 180 : 160,
+        child: MedicalCard(
+          title: "Medidas",
+          content:
+              "Peso: ${pesoPaciente?.toStringAsFixed(2) ?? 'N/A'} kg\nEstatura: ${estaturaPaciente?.toStringAsFixed(2) ?? 'N/A'} m",
+          icon: Icons.monitor_weight,
+          color: Colors.pinkAccent,
+          onTap:
+              () => _showDetailDialog(
+                context,
+                "Medidas",
+                "Peso: ${pesoPaciente?.toStringAsFixed(2) ?? 'N/A'} kg\nEstatura: ${estaturaPaciente?.toStringAsFixed(2) ?? 'N/A'} m",
+                Icons.monitor_weight,
+              ),
+        ),
+      ),
+
+      SizedBox(height: 16),
+      SizedBox(
+        height: isTablet ? 180 : 160,
+        child: MedicalCard(
+          title: "Cirugías",
+          content: antecedentes0['cirugias_anteriores'] ?? "Ninguna",
+          icon: Icons.local_hospital,
+          color: Colors.indigo,
+          onTap:
+              () => _showDetailDialog(
+                context,
+                "Cirugías",
+                antecedentes0['cirugias_anteriores'] ?? "Ninguna",
+                Icons.local_hospital,
+              ),
+        ),
+      ),
+
+      SizedBox(height: 16),
+      SizedBox(
+        height: isTablet ? 180 : 160,
+        child: MedicalCard(
+          title: "Hospitalizaciones",
+          content: antecedentes0['hospitalizaciones_anteriores'] ?? "Ninguna",
+          icon: Icons.local_hospital_outlined,
+          color: Colors.teal,
+          onTap:
+              () => _showDetailDialog(
+                context,
+                "Hospitalizaciones",
+                antecedentes0['hospitalizaciones_anteriores'] ?? "Ninguna",
+                Icons.local_hospital_outlined,
+              ),
+        ),
+      ),
+
+      SizedBox(height: 16),
+      SizedBox(
+        height: isTablet ? 180 : 160,
+        child: MedicalCard(
+          title: "Antecedentes Familiares",
+          content:
+              antecedentes0['antecedentes_familiares'] ?? "Ninguno registrado",
+          icon: Icons.family_restroom,
+          color: Colors.blueAccent,
+          onTap:
+              () => _showDetailDialog(
+                context,
+                "Antecedentes Familiares",
+                antecedentes0['antecedentes_familiares'] ??
+                    "Ninguno registrado",
+                Icons.family_restroom,
+              ),
+        ),
+      ),
+
+      SizedBox(height: 16),
+      SizedBox(
+        height: isTablet ? 180 : 160,
+        child: MedicalCard(
+          title: "Tratamientos",
+          content: formatTratamientos(),
+          icon: Icons.medication,
+          color: Colors.green,
+          onTap:
+              () => _showDetailDialog(
+                context,
+                "Tratamientos",
+                formatTratamientos(),
+                Icons.medication,
+              ),
+        ),
+      ),
+    ];
+
     return Scaffold(
       backgroundColor: AppTheme.background,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Datos Médicos',
-          style: TextStyle(fontWeight: FontWeight.w600),
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: isTablet ? 22 : 20,
+          ),
         ),
         backgroundColor: AppTheme.primary,
         elevation: 0,
@@ -747,7 +950,7 @@ class _MedicalDataScreenState extends State<MedicalDataScreen> {
             },
           ),
           if (widget.userId ==
-              null) // Only show edit button for logged-in users
+              null) // Solo mostrar botón de editar para usuarios logeados
             IconButton(
               icon: const Icon(Icons.edit),
               tooltip: 'Editar datos',
@@ -758,11 +961,13 @@ class _MedicalDataScreenState extends State<MedicalDataScreen> {
       body: RefreshIndicator(
         onRefresh: fetchMedicalData,
         color: AppTheme.primary,
-        child: CustomScrollView(
-          physics: const BouncingScrollPhysics(),
-          slivers: [
-            SliverToBoxAdapter(
-              child: MedicalProfileHeader(
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Encabezado con perfil médico
+              MedicalProfileHeader(
                 nombre: nombrePaciente,
                 peso: pesoPaciente,
                 estatura: estaturaPaciente,
@@ -770,154 +975,46 @@ class _MedicalDataScreenState extends State<MedicalDataScreen> {
                 contactoTelefono: contactoTelefono,
                 contactoRelacion: contactoRelacion,
               ),
-            ),
-            if (bmi != null)
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: BMIIndicator(bmi: bmi),
-                ),
-              ),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
+
+              // Título de la sección
+              Padding(
+                padding: EdgeInsets.all(isTablet ? 24.0 : 16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    Text("Información Médica", style: AppTheme.heading),
+                  children: [
+                    Text(
+                      "Información Médica",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: headingSize,
+                        color: AppTheme.textPrimary,
+                      ),
+                    ),
                     SizedBox(height: 4),
                     Text(
                       "Resumen de tu historial clínico y condiciones médicas",
-                      style: TextStyle(color: AppTheme.textSecondary),
+                      style: TextStyle(
+                        color: AppTheme.textSecondary,
+                        fontSize: contentSize,
+                      ),
                     ),
                   ],
                 ),
               ),
-            ),
-            SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              sliver: SliverGrid.count(
-                crossAxisCount: 2,
-                crossAxisSpacing: 16.0,
-                mainAxisSpacing: 16.0,
-                childAspectRatio: 1.1,
-                children: [
-                  MedicalCard(
-                    title: "Grupo Sanguíneo",
-                    content:
-                        historialClinico0['tipo_sangre'] ?? "No especificado",
-                    icon: Icons.bloodtype,
-                    color: AppTheme.bloodType,
-                    onTap:
-                        () => _showDetailDialog(
-                          context,
-                          "Grupo Sanguíneo",
-                          historialClinico0['tipo_sangre'] ?? "No especificado",
-                          Icons.bloodtype,
-                        ),
-                  ),
-                  MedicalCard(
-                    title: "Alergias",
-                    content: formatAlergias(),
-                    icon: Icons.warning_amber_rounded,
-                    color: AppTheme.allergies,
-                    onTap:
-                        () => _showDetailDialog(
-                          context,
-                          "Alergias",
-                          formatAlergias(),
-                          Icons.warning_amber_rounded,
-                        ),
-                  ),
-                  MedicalCard(
-                    title: "Enfermedades",
-                    content: formatEnfermedades(),
-                    icon: Icons.medical_services_outlined,
-                    color: AppTheme.diseases,
-                    onTap:
-                        () => _showDetailDialog(
-                          context,
-                          "Enfermedades",
-                          formatEnfermedades(),
-                          Icons.medical_services_outlined,
-                        ),
-                  ),
-                  MedicalCard(
-                    title: "Medidas",
-                    content:
-                        "Peso: ${pesoPaciente?.toStringAsFixed(2) ?? 'N/A'} kg\nEstatura: ${estaturaPaciente?.toStringAsFixed(2) ?? 'N/A'} m",
-                    icon: Icons.monitor_weight,
-                    color: Colors.pinkAccent,
-                    onTap:
-                        () => _showDetailDialog(
-                          context,
-                          "Medidas",
-                          "Peso: ${pesoPaciente?.toStringAsFixed(2) ?? 'N/A'} kg\nEstatura: ${estaturaPaciente?.toStringAsFixed(2) ?? 'N/A'} m",
-                          Icons.monitor_weight,
-                        ),
-                  ),
-                  MedicalCard(
-                    title: "Cirugías",
-                    content: antecedentes0['cirugias_anteriores'] ?? "Ninguna",
-                    icon: Icons.local_hospital,
-                    color: Colors.indigo,
-                    onTap:
-                        () => _showDetailDialog(
-                          context,
-                          "Cirugías",
-                          antecedentes0['cirugias_anteriores'] ?? "Ninguna",
-                          Icons.local_hospital,
-                        ),
-                  ),
-                  MedicalCard(
-                    title: "Hospitalizaciones",
-                    content:
-                        antecedentes0['hospitalizaciones_anteriores'] ??
-                        "Ninguna",
-                    icon: Icons.local_hospital_outlined,
-                    color: Colors.teal,
-                    onTap:
-                        () => _showDetailDialog(
-                          context,
-                          "Hospitalizaciones",
-                          antecedentes0['hospitalizaciones_anteriores'] ??
-                              "Ninguna",
-                          Icons.local_hospital_outlined,
-                        ),
-                  ),
-                  MedicalCard(
-                    title: "Antecedentes Familiares",
-                    content:
-                        antecedentes0['antecedentes_familiares'] ??
-                        "Ninguno registrado",
-                    icon: Icons.family_restroom,
-                    color: Colors.blueAccent,
-                    onTap:
-                        () => _showDetailDialog(
-                          context,
-                          "Antecedentes Familiares",
-                          antecedentes0['antecedentes_familiares'] ??
-                              "Ninguno registrado",
-                          Icons.family_restroom,
-                        ),
-                  ),
-                  MedicalCard(
-                    title: "Tratamientos",
-                    content: formatTratamientos(),
-                    icon: Icons.medication,
-                    color: Colors.green,
-                    onTap:
-                        () => _showDetailDialog(
-                          context,
-                          "Tratamientos",
-                          formatTratamientos(),
-                          Icons.medication,
-                        ),
-                  ),
-                ],
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: isTablet ? 24.0 : 16.0,
+                ),
+                child: Column(children: medicalCards),
               ),
-            ),
-          ],
+              if (bmi != null)
+                Padding(
+                  padding: EdgeInsets.all(isTablet ? 24.0 : 16.0),
+                  child: BMIIndicator(bmi: bmi),
+                ),
+              SizedBox(height: 24),
+            ],
+          ),
         ),
       ),
     );
