@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hfe_frontend/screens/screen.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class MedicalProfileHeader extends StatelessWidget {
   final String? nombre;
@@ -18,6 +20,75 @@ class MedicalProfileHeader extends StatelessWidget {
     this.contactoTelefono,
     this.contactoRelacion,
   });
+
+  Future<void> _handlePhoneNumberTap(BuildContext context) async {
+    if (contactoTelefono == null || contactoTelefono == 'No registrado') {
+      return;
+    }
+
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Contacto de emergencia',
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.primary,
+                ),
+              ),
+              const SizedBox(height: 20),
+              ListTile(
+                leading: const Icon(Icons.call, color: Colors.green),
+                title: const Text('Llamar'),
+                subtitle: Text(contactoTelefono!),
+                onTap: () async {
+                  final Uri phoneUri = Uri(
+                    scheme: 'tel',
+                    path: contactoTelefono,
+                  );
+                  
+                  if (await canLaunchUrl(phoneUri)) {
+                    await launchUrl(phoneUri);
+                  } else {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('No se pudo realizar la llamada'),
+                        ),
+                      );
+                    }
+                  }
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.copy, color: AppTheme.primary),
+                title: const Text('Copiar al portapapeles'),
+                onTap: () {
+                  Clipboard.setData(ClipboardData(text: contactoTelefono!));
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Número copiado al portapapeles'),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -157,9 +228,25 @@ class MedicalProfileHeader extends StatelessWidget {
               const SizedBox(width: 16),
               const Icon(Icons.phone, size: 16, color: Colors.white70),
               const SizedBox(width: 4),
-              Text(
-                contactoTelefono ?? 'No registrado',
-                style: const TextStyle(color: Colors.white),
+              InkWell(
+                onTap: () => _handlePhoneNumberTap(context),
+                child: Row(
+                  children: [
+                    Text(
+                      contactoTelefono ?? 'No registrado',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                    if (contactoTelefono != null && contactoTelefono != 'No registrado')
+                      const Icon(
+                        Icons.arrow_drop_down,
+                        size: 16,
+                        color: Colors.white,
+                      ),
+                  ],
+                ),
               ),
             ],
           ),
