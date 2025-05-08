@@ -40,13 +40,13 @@ class AppTheme {
   );
 
   static const TextStyle cardTitle = TextStyle(
-    fontSize: 21,
+    fontSize: 16,
     fontWeight: FontWeight.w600,
     color: textPrimary,
   );
 
   static const TextStyle cardContent = TextStyle(
-    fontSize: 19,
+    fontSize: 14,
     color: textSecondary,
     height: 1.4,
   );
