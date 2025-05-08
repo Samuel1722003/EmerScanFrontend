@@ -61,15 +61,15 @@ class _MedicalDataScreenState extends State<MedicalDataScreen> {
         return AlertDialog(
           title: Row(
             children: [
-              Icon(icon, color: AppTheme.primary, size: isTablet ? 32 : 28),
+              Icon(icon, color: AppTheme.primary, size: isTablet ? 28 : 24),
               const SizedBox(width: 10),
-              Text(title, style: TextStyle(fontSize: isTablet ? 26 : 22)),
+              Text(title, style: TextStyle(fontSize: isTablet ? 22 : 18)),
             ],
           ),
           content: SingleChildScrollView(
             child: Text(
               content,
-              style: TextStyle(fontSize: isTablet ? 22 : 20),
+              style: TextStyle(fontSize: isTablet ? 18 : 16),
             ),
           ),
           actions: [
@@ -77,7 +77,7 @@ class _MedicalDataScreenState extends State<MedicalDataScreen> {
               onPressed: () => Navigator.of(context).pop(),
               child: Text(
                 'Cerrar',
-                style: TextStyle(fontSize: isTablet ? 20 : 18),
+                style: TextStyle(fontSize: isTablet ? 16 : 14),
               ),
             ),
           ],
@@ -807,6 +807,7 @@ class _MedicalDataScreenState extends State<MedicalDataScreen> {
         ),
       ),
 
+      // Las siguientes tarjetas ocuparán todo el ancho (1 columna)
       SizedBox(height: 16),
       SizedBox(
         height: isTablet ? 180 : 160,
@@ -1001,17 +1002,23 @@ class _MedicalDataScreenState extends State<MedicalDataScreen> {
                   ],
                 ),
               ),
+
+              // Tarjetas médicas
               Padding(
                 padding: EdgeInsets.symmetric(
                   horizontal: isTablet ? 24.0 : 16.0,
                 ),
                 child: Column(children: medicalCards),
               ),
+
+              // Indicador de IMC al final (modificado para mostrar al final)
               if (bmi != null)
                 Padding(
                   padding: EdgeInsets.all(isTablet ? 24.0 : 16.0),
                   child: BMIIndicator(bmi: bmi),
                 ),
+
+              // Espaciado adicional al final
               SizedBox(height: 24),
             ],
           ),

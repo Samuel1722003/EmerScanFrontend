@@ -1,93 +1,77 @@
 import 'package:flutter/material.dart';
 import 'package:hfe_frontend/screens/screen.dart';
 
-class MedicalCard extends StatefulWidget {
+class MedicalCard extends StatelessWidget {
   final String title;
   final String content;
   final IconData icon;
   final Color color;
-  final VoidCallback? onTap;
+  final VoidCallback onTap;
 
   const MedicalCard({
-    super.key,
+    Key? key,
     required this.title,
     required this.content,
     required this.icon,
     required this.color,
-    this.onTap,
-  });
-
-  @override
-  State<MedicalCard> createState() => _MedicalCardState();
-}
-
-class _MedicalCardState extends State<MedicalCard>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _scaleAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 200),
-    );
-    _scaleAnimation = Tween<double>(
-      begin: 1.0,
-      end: 0.95,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
+    required this.onTap,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: (_) => _controller.forward(),
-      onTapUp: (_) => _controller.reverse(),
-      onTapCancel: () => _controller.reverse(),
-      onTap: widget.onTap,
-      child: AnimatedBuilder(
-        animation: _scaleAnimation,
-        builder: (context, child) {
-          return Transform.scale(scale: _scaleAnimation.value, child: child);
-        },
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: AppTheme.cardDecoration,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: widget.color.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(10),
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: color.withOpacity(
+            0.1,
+          ), // Fondo con color del icono en tono más bajo
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  icon,
+                  color: color,
+                  size: 30,
+                ), // Aumentado tamaño del icono
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
                     ),
-                    child: Icon(widget.icon, color: widget.color, size: 20),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(widget.title, style: AppTheme.cardTitle),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Expanded(
-                child: SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  child: Text(widget.content, style: AppTheme.cardContent),
                 ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Expanded(
+              child: Text(
+                content,
+                style: const TextStyle(
+                  fontSize: 19,
+                  color: AppTheme.textSecondary,
+                ),
+                maxLines: 5,
+                overflow: TextOverflow.ellipsis,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
