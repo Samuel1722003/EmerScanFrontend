@@ -19,6 +19,13 @@ class MedicalCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    final isTablet = screenSize.width >= 600;
+
+    final titleSize = isTablet ? 28.0 : 20.0;
+    final contentSize = isTablet ? 35.0 : 27.0;
+    final iconSize = isTablet ? 37.0 : 29.0;
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
@@ -47,7 +54,7 @@ class MedicalCard extends StatelessWidget {
                     color: color.withOpacity(0.15),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Icon(icon, color: color, size: 24),
+                  child: Icon(icon, color: color, size: iconSize),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -55,14 +62,14 @@ class MedicalCard extends StatelessWidget {
                     title,
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 16,
+                      fontSize: titleSize,
                       color: AppTheme.textPrimary,
                     ),
                   ),
                 ),
                 Icon(
                   Icons.arrow_forward_ios,
-                  size: 16,
+                  size: isTablet ? 30.0 : 20.0,
                   color: Colors.grey.shade400,
                 ),
               ],
@@ -72,7 +79,7 @@ class MedicalCard extends StatelessWidget {
               child: Text(
                 content,
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: contentSize,
                   color: AppTheme.textSecondary,
                   height: 1.4,
                 ),

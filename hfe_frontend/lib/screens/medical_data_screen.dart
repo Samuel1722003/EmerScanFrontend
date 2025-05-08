@@ -95,7 +95,7 @@ class _MedicalDataScreenState extends State<MedicalDataScreen> {
                       child: Text(
                         title,
                         style: TextStyle(
-                          fontSize: isTablet ? 22 : 18,
+                          fontSize: isTablet ? 34 : 30,
                           fontWeight: FontWeight.bold,
                           color: AppTheme.textPrimary,
                         ),
@@ -135,7 +135,7 @@ class _MedicalDataScreenState extends State<MedicalDataScreen> {
                               Text(
                                 "No hay información registrada",
                                 style: TextStyle(
-                                  fontSize: isTablet ? 18 : 16,
+                                  fontSize: isTablet ? 24 : 20,
                                   color: Colors.grey.shade600,
                                 ),
                                 textAlign: TextAlign.center,
@@ -147,7 +147,7 @@ class _MedicalDataScreenState extends State<MedicalDataScreen> {
                         Text(
                           content,
                           style: TextStyle(
-                            fontSize: isTablet ? 18 : 16,
+                            fontSize: isTablet ? 34 : 30,
                             height: 1.5,
                             color: AppTheme.textSecondary,
                           ),
