@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hfe_frontend/screens/widgets.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -13,6 +14,7 @@ class MedicalDataScreen extends StatefulWidget {
 }
 
 class _MedicalDataScreenState extends State<MedicalDataScreen> {
+  DateTime? lastUpdated;
   bool isLoading = true;
   bool hasMedicalData = false;
   bool isRegistering = false;
@@ -51,6 +53,7 @@ class _MedicalDataScreenState extends State<MedicalDataScreen> {
     String title,
     String content,
     IconData icon,
+    Color color,
   ) {
     final screenSize = MediaQuery.of(context).size;
     final isTablet = screenSize.width >= 600;
@@ -58,31 +61,147 @@ class _MedicalDataScreenState extends State<MedicalDataScreen> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Row(
-            children: [
-              Icon(icon, color: AppTheme.primary, size: isTablet ? 28 : 24),
-              const SizedBox(width: 10),
-              Text(title, style: TextStyle(fontSize: isTablet ? 22 : 18)),
-            ],
-          ),
-          content: SingleChildScrollView(
-            child: Text(
-              content,
-              style: TextStyle(fontSize: isTablet ? 18 : 16),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(
-                'Cerrar',
-                style: TextStyle(fontSize: isTablet ? 16 : 14),
-              ),
-            ),
-          ],
+        return Dialog(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          elevation: 8,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Header coloreado
+              Container(
+                padding: EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.2),
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    topRight: Radius.circular(20),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(icon, color: color, size: isTablet ? 28 : 24),
+                    ),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        title,
+                        style: TextStyle(
+                          fontSize: isTablet ? 22 : 18,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.textPrimary,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.close, color: Colors.grey),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Contenido
+              Container(
+                padding: EdgeInsets.all(20),
+                constraints: BoxConstraints(
+                  maxHeight: MediaQuery.of(context).size.height * 0.5,
+                ),
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (content == "Ninguna registrada" ||
+                          content == "Ninguno" ||
+                          content == "No especificado" ||
+                          content == "Ninguno registrado")
+                        Center(
+                          child: Column(
+                            children: [
+                              Icon(
+                                Icons.info_outline,
+                                size: isTablet ? 64 : 48,
+                                color: Colors.grey.shade400,
+                              ),
+                              SizedBox(height: 16),
+                              Text(
+                                "No hay información registrada",
+                                style: TextStyle(
+                                  fontSize: isTablet ? 18 : 16,
+                                  color: Colors.grey.shade600,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                        )
+                      else
+                        Text(
+                          content,
+                          style: TextStyle(
+                            fontSize: isTablet ? 18 : 16,
+                            height: 1.5,
+                            color: AppTheme.textSecondary,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+
+              // Footer con botones
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(20),
+                    bottomRight: Radius.circular(20),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    if (content != "Ninguna registrada" &&
+                        content != "Ninguno" &&
+                        content != "No especificado" &&
+                        content != "Ninguno registrado")
+                      TextButton.icon(
+                        icon: Icon(Icons.copy, size: 18),
+                        label: Text("Copiar"),
+                        onPressed: () {
+                          Clipboard.setData(ClipboardData(text: content));
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'Información copiada al portapapeles',
+                              ),
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                        },
+                      ),
+                    SizedBox(width: 8),
+                    ElevatedButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: color,
+                        foregroundColor: Colors.white,
+                      ),
+                      child: Text('Cerrar'),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         );
       },
@@ -203,6 +322,9 @@ class _MedicalDataScreenState extends State<MedicalDataScreen> {
           enfermedades0 = futures[1];
           antecedentes0 = (futures[2] ?? {}) as Map<String, dynamic>;
           tratamientos0 = futures[3] ?? [];
+          setState(() {
+            lastUpdated = DateTime.now();
+          });
           isLoading = false;
         });
       }
@@ -630,6 +752,21 @@ class _MedicalDataScreenState extends State<MedicalDataScreen> {
         .join(', ');
   }
 
+  String _formatDateTime(DateTime dateTime) {
+    final now = DateTime.now();
+    final difference = now.difference(dateTime);
+
+    if (difference.inSeconds < 60) {
+      return "Hace un momento";
+    } else if (difference.inMinutes < 60) {
+      return "Hace ${difference.inMinutes} ${difference.inMinutes == 1 ? 'minuto' : 'minutos'}";
+    } else if (difference.inHours < 24) {
+      return "Hace ${difference.inHours} ${difference.inHours == 1 ? 'hora' : 'horas'}";
+    } else {
+      return "${dateTime.day}/${dateTime.month}/${dateTime.year} ${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}";
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // Obtenemos el tamaño de la pantalla para hacer la UI responsiva
@@ -645,26 +782,49 @@ class _MedicalDataScreenState extends State<MedicalDataScreen> {
       return Scaffold(
         backgroundColor: AppTheme.background,
         body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SizedBox(
-                width: isTablet ? 60 : 50,
-                height: isTablet ? 60 : 50,
-                child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primary),
-                  strokeWidth: isTablet ? 4 : 3,
+          child: Container(
+            padding: EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 10,
+                  offset: Offset(0, 4),
                 ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                "Cargando información médica...",
-                style: TextStyle(
-                  color: AppTheme.textSecondary,
-                  fontSize: isTablet ? 18 : 16,
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(
+                  width: isTablet ? 60 : 50,
+                  height: isTablet ? 60 : 50,
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primary),
+                    strokeWidth: isTablet ? 4 : 3,
+                  ),
                 ),
-              ),
-            ],
+                SizedBox(height: 24),
+                Text(
+                  "Cargando tu información médica...",
+                  style: TextStyle(
+                    color: AppTheme.textPrimary,
+                    fontSize: isTablet ? 18 : 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  "Esto puede tomar unos segundos",
+                  style: TextStyle(
+                    color: AppTheme.textSecondary,
+                    fontSize: isTablet ? 14 : 12,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       );
@@ -784,6 +944,7 @@ class _MedicalDataScreenState extends State<MedicalDataScreen> {
                       "Grupo Sanguíneo",
                       historialClinico0['tipo_sangre'] ?? "No especificado",
                       Icons.bloodtype,
+                      AppTheme.bloodType,
                     ),
               ),
             ),
@@ -800,6 +961,7 @@ class _MedicalDataScreenState extends State<MedicalDataScreen> {
                       "Alergias",
                       formatAlergias(),
                       Icons.warning_amber_rounded,
+                      AppTheme.allergies,
                     ),
               ),
             ),
@@ -822,6 +984,7 @@ class _MedicalDataScreenState extends State<MedicalDataScreen> {
                 "Enfermedades",
                 formatEnfermedades(),
                 Icons.medical_services_outlined,
+                AppTheme.diseases,
               ),
         ),
       ),
@@ -841,6 +1004,7 @@ class _MedicalDataScreenState extends State<MedicalDataScreen> {
                 "Medidas",
                 "Peso: ${pesoPaciente?.toStringAsFixed(2) ?? 'N/A'} kg\nEstatura: ${estaturaPaciente?.toStringAsFixed(2) ?? 'N/A'} m",
                 Icons.monitor_weight,
+                Colors.pinkAccent,
               ),
         ),
       ),
@@ -859,6 +1023,7 @@ class _MedicalDataScreenState extends State<MedicalDataScreen> {
                 "Cirugías",
                 antecedentes0['cirugias_anteriores'] ?? "Ninguna",
                 Icons.local_hospital,
+                Colors.indigo,
               ),
         ),
       ),
@@ -877,6 +1042,7 @@ class _MedicalDataScreenState extends State<MedicalDataScreen> {
                 "Hospitalizaciones",
                 antecedentes0['hospitalizaciones_anteriores'] ?? "Ninguna",
                 Icons.local_hospital_outlined,
+                Colors.teal,
               ),
         ),
       ),
@@ -897,6 +1063,7 @@ class _MedicalDataScreenState extends State<MedicalDataScreen> {
                 antecedentes0['antecedentes_familiares'] ??
                     "Ninguno registrado",
                 Icons.family_restroom,
+                Colors.blueAccent,
               ),
         ),
       ),
@@ -915,6 +1082,7 @@ class _MedicalDataScreenState extends State<MedicalDataScreen> {
                 "Tratamientos",
                 formatTratamientos(),
                 Icons.medication,
+                Colors.green,
               ),
         ),
       ),
@@ -991,6 +1159,31 @@ class _MedicalDataScreenState extends State<MedicalDataScreen> {
                         color: AppTheme.textPrimary,
                       ),
                     ),
+                    if (lastUpdated != null)
+                      Padding(
+                        padding: EdgeInsets.only(
+                          left: isTablet ? 24.0 : 16.0,
+                          right: isTablet ? 24.0 : 16.0,
+                          bottom: 16.0,
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.update,
+                              size: 14,
+                              color: AppTheme.textSecondary,
+                            ),
+                            SizedBox(width: 4),
+                            Text(
+                              "Actualizado: ${_formatDateTime(lastUpdated!)}",
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: AppTheme.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     SizedBox(height: 4),
                     Text(
                       "Resumen de tu historial clínico y condiciones médicas",
