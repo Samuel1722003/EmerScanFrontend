@@ -67,13 +67,32 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: AppTheme.background,
       appBar: AppBar(
-        title: Text(
-          '¡Hola, $userName!',
-          style: const TextStyle(fontWeight: FontWeight.w600),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '¡Hola, $userName!',
+              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 23),
+            ),
+          ],
         ),
         backgroundColor: AppTheme.primary,
         elevation: 0,
-        centerTitle: true,
+        centerTitle: false,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.notifications_outlined),
+            onPressed: () {
+              Navigator.pushNamed(context, 'NotificationsScreen');
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.settings_outlined),
+            onPressed: () {
+              Navigator.pushNamed(context, 'SettingsScreen');
+            },
+          ),
+        ],
       ),
       drawer: _buildDrawer(context),
       body:
@@ -116,33 +135,46 @@ class _HomeScreenState extends State<HomeScreen> {
           Container(
             padding: const EdgeInsets.only(top: 50, bottom: 20),
             width: double.infinity,
-            color: AppTheme.primary,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [AppTheme.primary, AppTheme.primary.withOpacity(0.8)],
+              ),
+            ),
             child: Column(
               children: [
                 Container(
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 2),
+                    border: Border.all(color: Colors.white, width: 3),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 10,
+                      ),
+                    ],
                   ),
                   child: const CircleAvatar(
-                    radius: 40,
+                    radius: 45,
                     backgroundColor: Colors.white,
                     child: Icon(
                       Icons.person,
-                      size: 50,
+                      size: 55,
                       color: AppTheme.primary,
                     ),
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 16),
                 Text(
                   userName,
                   style: const TextStyle(
-                    fontSize: 18,
+                    fontSize: 22,
                     fontWeight: FontWeight.bold,
-                    color: Color.fromARGB(255, 0, 0, 0),
+                    color: Colors.white,
                   ),
                 ),
+                const SizedBox(height: 6),
               ],
             ),
           ),
@@ -150,15 +182,13 @@ class _HomeScreenState extends State<HomeScreen> {
           // Opciones de menú
           Expanded(
             child: ListView(
-              padding: EdgeInsets.zero,
+              padding: const EdgeInsets.symmetric(vertical: 10),
               children: [
                 // Opción Datos personales
-                ListTile(
-                  leading: const Icon(Icons.person, color: AppTheme.primary),
-                  title: const Text(
-                    'Datos personales',
-                    style: TextStyle(fontWeight: FontWeight.w500),
-                  ),
+                _buildDrawerItem(
+                  icon: Icons.person,
+                  title: 'Datos personales',
+                  color: AppTheme.primary,
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.pushNamed(context, 'PersonalDataScreen');
@@ -166,48 +196,36 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
 
                 // Opción Datos médicos
-                ListTile(
-                  leading: const Icon(
-                    Icons.medical_services,
-                    color: AppTheme.secondary,
-                  ),
-                  title: const Text(
-                    'Datos médicos',
-                    style: TextStyle(fontWeight: FontWeight.w500),
-                  ),
+                _buildDrawerItem(
+                  icon: Icons.medical_services,
+                  title: 'Datos médicos',
+                  color: AppTheme.secondary,
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.pushNamed(context, 'MedicalDataScreen');
                   },
                 ),
 
-                const Divider(),
+                const Divider(height: 30, thickness: 1),
 
                 // Opción Código QR
-                ListTile(
-                  leading: const Icon(Icons.qr_code, color: AppTheme.accent),
-                  title: const Text(
-                    'Código QR',
-                    style: TextStyle(fontWeight: FontWeight.w500),
-                  ),
+                _buildDrawerItem(
+                  icon: Icons.qr_code,
+                  title: 'Código QR',
+                  color: AppTheme.accent,
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.pushNamed(context, 'QRCodeScreen');
                   },
                 ),
 
-                const Divider(),
+                const Divider(height: 30, thickness: 1),
 
                 // Opción Ajustes
-                ListTile(
-                  leading: Icon(Icons.settings, color: AppTheme.textSecondary),
-                  title: Text(
-                    'Ajustes',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w500,
-                      color: AppTheme.textSecondary,
-                    ),
-                  ),
+                _buildDrawerItem(
+                  icon: Icons.settings,
+                  title: 'Ajustes',
+                  color: AppTheme.textSecondary,
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.pushNamed(context, 'SettingsScreen');
@@ -215,18 +233,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
 
                 // Opción Salir
-                ListTile(
-                  leading: const Icon(
-                    Icons.exit_to_app,
-                    color: Colors.redAccent,
-                  ),
-                  title: const Text(
-                    'Salir',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w500,
-                      color: Colors.redAccent,
-                    ),
-                  ),
+                _buildDrawerItem(
+                  icon: Icons.exit_to_app,
+                  title: 'Salir',
+                  color: Colors.redAccent,
                   onTap: () async {
                     // Cerrar sesión
                     final supabase = Supabase.instance.client;
@@ -246,13 +256,74 @@ class _HomeScreenState extends State<HomeScreen> {
 
           // Versión al final del drawer
           Container(
-            padding: const EdgeInsets.symmetric(vertical: 10),
-            child: Text(
-              'v1.0.0',
-              style: TextStyle(color: AppTheme.textSecondary, fontSize: 12),
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Column(
+              children: [
+                const Divider(thickness: 0.5),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.info_outline,
+                      size: 16,
+                      color: AppTheme.textSecondary,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'v1.0.0',
+                      style: TextStyle(
+                        color: AppTheme.textSecondary,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  // Método auxiliar para construir items del drawer
+  Widget _buildDrawerItem({
+    required IconData icon,
+    required String title,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: ListTile(
+        leading: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(icon, color: color, size: 24),
+        ),
+        title: Text(
+          title,
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 16,
+            color: AppTheme.textPrimary,
+          ),
+        ),
+        trailing: Icon(
+          Icons.arrow_forward_ios,
+          color: AppTheme.textSecondary,
+          size: 16,
+        ),
+        onTap: onTap,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        tileColor: Colors.transparent,
+        hoverColor: color.withOpacity(0.05),
       ),
     );
   }
@@ -334,14 +405,15 @@ class _HomeScreenState extends State<HomeScreen> {
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: AppTheme.cardBg,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withOpacity(0.08),
               offset: const Offset(0, 4),
-              blurRadius: 10,
+              blurRadius: 15,
             ),
           ],
+          border: Border.all(color: color.withOpacity(0.1), width: 1.5),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -349,15 +421,38 @@ class _HomeScreenState extends State<HomeScreen> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
+                color: color.withOpacity(0.12),
+                borderRadius: BorderRadius.circular(16),
               ),
-              child: Icon(icon, color: color, size: 30),
+              child: Icon(icon, color: color, size: 32),
             ),
-            const SizedBox(height: 16),
-            Text(title, style: AppTheme.cardTitle),
-            const SizedBox(height: 8),
-            Text(description, style: AppTheme.cardContent),
+            const SizedBox(height: 10),
+            Text(
+              title,
+              style: AppTheme.cardTitle.copyWith(fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: 5),
+            Text(
+              description,
+              style: AppTheme.cardContent.copyWith(fontSize: 12, height: 1.3),
+            ),
+            const Spacer(),
+            // Botón de "Ver más" con flecha
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Text(
+                  "Ver más",
+                  style: TextStyle(
+                    color: color,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Icon(Icons.arrow_forward_ios, color: color, size: 12),
+              ],
+            ),
           ],
         ),
       ),
