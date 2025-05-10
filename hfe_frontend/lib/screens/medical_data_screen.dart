@@ -728,9 +728,55 @@ class _MedicalDataScreenState extends State<MedicalDataScreen> {
     );
   }
 
-  String formatAlergias() {
+  // Funciones nuevas para clasificar alergias
+  String formatAlergiasMedicamentos() {
     if (alergias0.isEmpty) return "Ninguna registrada";
-    return alergias0.map((a) => a['nombre_alergia']).join(', ');
+
+    final medicamentosAlergias =
+        alergias0.where((a) {
+          final nombreAlergia = a['nombre_alergia'].toString().toLowerCase();
+          // Lista de palabras clave para identificar medicamentos
+          return nombreAlergia.contains('penicilina') ||
+              nombreAlergia.contains('aspirina') ||
+              nombreAlergia.contains('ibuprofeno') ||
+              nombreAlergia.contains('paracetamol') ||
+              nombreAlergia.contains('antibiótico') ||
+              nombreAlergia.contains('sulfamida') ||
+              nombreAlergia.contains('analgésico') ||
+              nombreAlergia.contains('aine') ||
+              nombreAlergia.contains('antiinflamatorio') ||
+              nombreAlergia.contains('medicamento');
+        }).toList();
+
+    if (medicamentosAlergias.isEmpty) return "Ninguna registrada";
+    return medicamentosAlergias.map((a) => a['nombre_alergia']).join(', ');
+  }
+
+  String formatAlergiasNaturales() {
+    if (alergias0.isEmpty) return "Ninguna registrada";
+
+    final naturalesAlergias =
+        alergias0.where((a) {
+          final nombreAlergia = a['nombre_alergia'].toString().toLowerCase();
+          // Verificamos primero si es un medicamento
+          final esMedicamento =
+              nombreAlergia.contains('penicilina') ||
+              nombreAlergia.contains('aspirina') ||
+              nombreAlergia.contains('ibuprofeno') ||
+              nombreAlergia.contains('paracetamol') ||
+              nombreAlergia.contains('antibiótico') ||
+              nombreAlergia.contains('sulfamida') ||
+              nombreAlergia.contains('analgésico') ||
+              nombreAlergia.contains('aine') ||
+              nombreAlergia.contains('antiinflamatorio') ||
+              nombreAlergia.contains('medicamento');
+
+          // Si no es medicamento, lo consideramos natural
+          return !esMedicamento;
+        }).toList();
+
+    if (naturalesAlergias.isEmpty) return "Ninguna registrada";
+    return naturalesAlergias.map((a) => a['nombre_alergia']).join(', ');
   }
 
   String formatEnfermedades() {
@@ -927,48 +973,67 @@ class _MedicalDataScreenState extends State<MedicalDataScreen> {
 
     // Lista de widgets para las tarjetas médicas
     final List<Widget> medicalCards = [
-      // Primera fila: Grupo Sanguíneo y Alergias (2 columnas)
+      // Tarjeta de Grupo Sanguíneo (ahora ocupa todo el ancho)
       SizedBox(
-        height: isTablet ? 200 : 180,
-        child: Row(
-          children: [
-            Expanded(
-              child: MedicalCard(
-                title: "Grupo Sanguíneo",
-                content: historialClinico0['tipo_sangre'] ?? "No especificado",
-                icon: Icons.bloodtype,
-                color: AppTheme.bloodType,
-                onTap:
-                    () => _showDetailDialog(
-                      context,
-                      "Grupo Sanguíneo",
-                      historialClinico0['tipo_sangre'] ?? "No especificado",
-                      Icons.bloodtype,
-                      AppTheme.bloodType,
-                    ),
+        height: isTablet ? 180 : 160,
+        child: MedicalCard(
+          title: "Grupo Sanguíneo",
+          content: historialClinico0['tipo_sangre'] ?? "No especificado",
+          icon: Icons.bloodtype,
+          color: AppTheme.bloodType,
+          onTap:
+              () => _showDetailDialog(
+                context,
+                "Grupo Sanguíneo",
+                historialClinico0['tipo_sangre'] ?? "No especificado",
+                Icons.bloodtype,
+                AppTheme.bloodType,
               ),
-            ),
-            SizedBox(width: 16),
-            Expanded(
-              child: MedicalCard(
-                title: "Alergias",
-                content: formatAlergias(),
-                icon: Icons.warning_amber_rounded,
-                color: AppTheme.allergies,
-                onTap:
-                    () => _showDetailDialog(
-                      context,
-                      "Alergias",
-                      formatAlergias(),
-                      Icons.warning_amber_rounded,
-                      AppTheme.allergies,
-                    ),
-              ),
-            ),
-          ],
         ),
       ),
 
+      // Reemplaza la tarjeta de alergias existente por estas dos tarjetas
+      SizedBox(height: 16),
+      // Tarjeta de Alergias a Medicamentos
+      SizedBox(
+        height: isTablet ? 180 : 160,
+        child: MedicalCard(
+          title: "Alergias a Medicamentos",
+          content: formatAlergiasMedicamentos(),
+          icon: Icons.medication_outlined,
+          color: AppTheme.allergies.withRed(
+            180,
+          ), // Un tono ligeramente diferente
+          onTap:
+              () => _showDetailDialog(
+                context,
+                "Alergias a Medicamentos",
+                formatAlergiasMedicamentos(),
+                Icons.medication_outlined,
+                AppTheme.allergies.withRed(180),
+              ),
+        ),
+      ),
+
+      SizedBox(height: 16),
+      // Tarjeta de Alergias Naturales
+      SizedBox(
+        height: isTablet ? 180 : 160,
+        child: MedicalCard(
+          title: "Alergias Naturales",
+          content: formatAlergiasNaturales(),
+          icon: Icons.eco_outlined,
+          color: AppTheme.allergies.withGreen(180), // Otro tono diferente
+          onTap:
+              () => _showDetailDialog(
+                context,
+                "Alergias Naturales",
+                formatAlergiasNaturales(),
+                Icons.eco_outlined,
+                AppTheme.allergies.withGreen(180),
+              ),
+        ),
+      ),
       // Las siguientes tarjetas ocuparán todo el ancho (1 columna)
       SizedBox(height: 16),
       SizedBox(
