@@ -21,11 +21,13 @@ class BMIIndicator extends StatelessWidget {
   }
 
   String _getBmiDescription() {
-    if (bmi < 18.5)
+    if (bmi < 18.5) {
       return "Podría indicar desnutrición o un metabolismo muy acelerado";
+    }
     if (bmi < 25) return "Tu peso es adecuado para tu estatura";
-    if (bmi < 30)
+    if (bmi < 30) {
       return "Recomendable vigilar dieta y aumentar actividad física";
+    }
     return "Se recomienda consultar con un profesional de la salud";
   }
 
@@ -125,7 +127,7 @@ class BMIIndicator extends StatelessWidget {
           const SizedBox(height: 24),
 
           // Escala visual mejorada
-          Container(
+          SizedBox(
             height: 60,
             width: double.infinity,
             child: Stack(
@@ -152,7 +154,7 @@ class BMIIndicator extends StatelessWidget {
                   left:
                       _getIndicatorPosition() *
                       (MediaQuery.of(context).size.width - 80),
-                  child: Container(
+                  child: SizedBox(
                     height: 60,
                     width: 20,
                     child: Column(

@@ -12,6 +12,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   String userName = '';
+  String userId = '';
   bool isLoading = true;
 
   @override
@@ -22,9 +23,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _loadUserData() async {
     try {
+      final prefs = await SharedPreferences.getInstance();
+      final storedUserId = prefs.getString('user_id');
+      final storedUserName = prefs.getString('user_name');
+
       final supabase = Supabase.instance.client;
       final user = supabase.auth.currentUser;
 
+      // Primero intentamos obtener datos desde Supabase Auth si está disponible
       if (user != null) {
         final userData =
             await supabase
@@ -37,21 +43,31 @@ class _HomeScreenState extends State<HomeScreen> {
           setState(() {
             userName =
                 '${userData['nombre'] ?? ''} ${userData['apellido_paterno'] ?? ''}';
+            userId = user.id;
             isLoading = false;
           });
         }
-      } else {
-        final prefs = await SharedPreferences.getInstance();
-        final storedUserName = prefs.getString('user_name');
+      }
+      // Si no hay usuario autenticado con Auth, usamos SharedPreferences
+      else if (storedUserId != null && storedUserName != null) {
         if (mounted) {
           setState(() {
-            userName = storedUserName ?? 'Usuario';
+            userName = storedUserName;
+            userId = storedUserId;
+            isLoading = false;
+          });
+        }
+      }
+      // Si no hay datos en SharedPreferences, usamos un valor por defecto
+      else {
+        if (mounted) {
+          setState(() {
+            userName = 'Usuario';
             isLoading = false;
           });
         }
       }
     } catch (e) {
-      // ignore: avoid_print
       print('Error al cargar datos del usuario: $e');
       if (mounted) {
         setState(() {
@@ -244,7 +260,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
                     // Limpiar preferencias
                     final prefs = await SharedPreferences.getInstance();
+                    await prefs.remove('user_id');
                     await prefs.remove('user_name');
+                    await prefs.remove('user_email');
 
                     if (!mounted) return;
                     Navigator.pushReplacementNamed(context, 'LoginScreen');

@@ -1,9 +1,59 @@
 import 'package:flutter/material.dart';
 import 'package:hfe_frontend/screens/widgets.dart';
 import 'package:hfe_frontend/screens/screen.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SignUpScreen4 extends StatelessWidget {
   const SignUpScreen4({super.key});
+
+  // Método para guardar información básica del usuario en SharedPreferences
+  Future<void> _saveUserInfo(Map<String, dynamic> userData) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(
+      'user_name',
+      '${userData['nombre'] ?? ''} ${userData['apellido_paterno'] ?? ''}',
+    );
+  }
+
+  // Método para preparar la navegación hacia el HomeScreen
+  Future<void> _navigateToHome(BuildContext context) async {
+    try {
+      final supabase = Supabase.instance.client;
+      final user = supabase.auth.currentUser;
+
+      // Si tenemos un usuario autenticado, obtenemos su información básica
+      if (user != null) {
+        final userData =
+            await supabase
+                .from('usuario_persona')
+                .select('nombre, apellido_paterno')
+                .eq('id', user.id)
+                .single();
+
+        await _saveUserInfo(userData);
+      }
+
+      // Navegar a HomeScreen y limpiar el stack de navegación
+      if (!context.mounted) return;
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        'HomeScreen',
+        (route) => false,
+      );
+    } catch (e) {
+      // En caso de error, lo manejamos adecuadamente
+      print('Error al navegar al HomeScreen: $e');
+
+      // Si hay un error, aún así navegamos al HomeScreen
+      if (!context.mounted) return;
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        'HomeScreen',
+        (route) => false,
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +104,7 @@ class SignUpScreen4 extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             const Text(
-              'Tu registro ha sido completado correctamente. Ahora puedes iniciar sesión para acceder a tu cuenta.',
+              'Tu registro ha sido completado correctamente. Ahora accederás a tu cuenta automáticamente.',
               style: AppTheme.cardContent,
               textAlign: TextAlign.center,
             ),
@@ -62,17 +112,10 @@ class SignUpScreen4 extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {
-                  // Navegar a LoginScreen y limpiar el stack de navegación
-                  Navigator.pushNamedAndRemoveUntil(
-                    context,
-                    'LoginScreen',
-                    (route) => false,
-                  );
-                },
+                onPressed: () => _navigateToHome(context),
                 style: AppTheme.primaryButtonStyle,
                 child: const Text(
-                  'Iniciar Sesión',
+                  'Continuar',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               ),

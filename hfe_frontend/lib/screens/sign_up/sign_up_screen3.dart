@@ -4,6 +4,7 @@ import 'package:hfe_frontend/screens/widgets.dart';
 import 'package:hfe_frontend/screens/screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:bcrypt/bcrypt.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SignUpScreen3 extends StatefulWidget {
   const SignUpScreen3({super.key});
@@ -108,10 +109,19 @@ class _SignUpScreen3State extends State<SignUpScreen3> {
                   'genero': signUpData.genero,
                   'telefono': signUpData.telefono,
                 })
-                .select('id')
+                .select('id, nombre, apellido_paterno')
                 .single();
 
         final usuarioId = insertResponse['id'];
+
+        // Guardar información del usuario en SharedPreferences para mantener la sesión
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('user_id', usuarioId);
+        await prefs.setString(
+          'user_name',
+          '${insertResponse['nombre']} ${insertResponse['apellido_paterno']}',
+        );
+        await prefs.setString('user_email', signUpData.correo);
 
         // Generar URL para el QR (usa tu dominio de Firebase Hosting real)
         final qrUrl =
