@@ -960,7 +960,7 @@ class _MedicalDataScreenState extends State<MedicalDataScreen> {
           ),
         ),
         body:
-            _buildRegistrationForm(), // Este método tendría que adaptarse también
+            _buildRegistrationForm(),
       );
     }
 
